@@ -14,7 +14,7 @@ import {
 
 import {DataStoreService} from "@services/data-store/data-store.service.js";
 import {SystemError} from "@services/errors/base/system.error.js";
-import {ConfigService} from "@services/config/config.service.js";
+import {EnvironmentService} from "@services/environment/environment.service.js";
 
 export interface CreatedTokenPair {
   sessionId: string
@@ -24,7 +24,7 @@ export interface CreatedTokenPair {
 
 export class TokenService {
   constructor(
-    private configService: ConfigService,
+    private envService: EnvironmentService,
     private dataStoreService: DataStoreService
   ) {}
 
@@ -52,7 +52,7 @@ export class TokenService {
     // Generate the expiry of the refresh token here so I can set an initial expiry on the sid value stored.
     // This expiry is then updated as the token is refreshed.
     // todo: the expiry of the stored sid doesn't exactly match the refresh tokens expiry as set by jsonwebtoken.
-    const expiry = this._parseTokenExpiry(this.configService.config.auth.refreshToken.expiry);
+    const expiry = this._parseTokenExpiry(this.envService.vars.auth.refreshToken.expiry);
 
     await this._setSessionCounterId(sessionId, counterId, expiry);
     const tokenPair = await this._getTokenPair(userDto, sessionId, counterId);
@@ -79,7 +79,7 @@ export class TokenService {
 
     // Update the expiry of the sequence id to match the newly generated refresh token.
     // todo: the expiry of the stored sid doesn't exactly match the refresh tokens expiry as set by jsonwebtoken.
-    const expiry = this._parseTokenExpiry(this.configService.config.auth.refreshToken.expiry);
+    const expiry = this._parseTokenExpiry(this.envService.vars.auth.refreshToken.expiry);
     await this._setSessionCounterId(sessionId, counterId + 1, expiry);
 
     return this._getTokenPair(userDto, sessionId, counterId + 1);
@@ -95,8 +95,8 @@ export class TokenService {
    */
   private async _getTokenPair(userDto: UserDto, sessionId: string, counterId: number): Promise<TokenPair> {
     const basicPayload = {
-      iss: this.configService.config.auth.issuer || "localful",
-      aud: this.configService.config.auth.audience || "localful",
+      iss: this.envService.vars.auth.issuer || "localful",
+      aud: this.envService.vars.auth.audience || "localful",
       sub: userDto.id,
       sid: sessionId,
       cid: counterId,
@@ -110,8 +110,8 @@ export class TokenService {
     };
     const accessToken = jsonwebtoken.sign(
       accessTokenPayload,
-      this.configService.config.auth.accessToken.secret,
-      { expiresIn: this.configService.config.auth.accessToken.expiry },
+      this.envService.vars.auth.accessToken.secret,
+      { expiresIn: this.envService.vars.auth.accessToken.expiry },
     );
 
     const refreshTokenPayload = {
@@ -120,8 +120,8 @@ export class TokenService {
     };
     const refreshToken = jsonwebtoken.sign(
       refreshTokenPayload,
-      this.configService.config.auth.refreshToken.secret,
-      { expiresIn: this.configService.config.auth.refreshToken.expiry },
+      this.envService.vars.auth.refreshToken.secret,
+      { expiresIn: this.envService.vars.auth.refreshToken.expiry },
     );
 
     return {
@@ -136,7 +136,7 @@ export class TokenService {
    */
   async validateAndDecodeAccessToken(accessToken: string): Promise<AccessTokenPayload|null> {
     try {
-      const payload = jsonwebtoken.verify(accessToken, this.configService.config.auth.accessToken.secret) as unknown as AccessTokenPayload;
+      const payload = jsonwebtoken.verify(accessToken, this.envService.vars.auth.accessToken.secret) as unknown as AccessTokenPayload;
       const isValidToken = await this._validateCustomAuthClaims(payload.sid, payload.cid);
       if (isValidToken) {
         return payload;
@@ -155,7 +155,7 @@ export class TokenService {
    */
   async validateAndDecodeRefreshToken(refreshToken: string): Promise<RefreshTokenPayload|null> {
     try {
-      const payload = jsonwebtoken.verify(refreshToken, this.configService.config.auth.refreshToken.secret) as unknown as RefreshTokenPayload;
+      const payload = jsonwebtoken.verify(refreshToken, this.envService.vars.auth.refreshToken.secret) as unknown as RefreshTokenPayload;
       const isValidToken = await this._validateCustomAuthClaims(payload.sid, payload.cid);
       if (isValidToken) {
         return payload;
@@ -248,8 +248,8 @@ export class TokenService {
    */
   async getActionToken(options: ActionTokenOptions) {
     const basicPayload = {
-      iss: this.configService.config.auth.issuer || "localful",
-      aud: this.configService.config.auth.audience || "localful",
+      iss: this.envService.vars.auth.issuer || "localful",
+      aud: this.envService.vars.auth.audience || "localful",
       sub: options.userId,
     };
 

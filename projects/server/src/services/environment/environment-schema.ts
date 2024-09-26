@@ -1,17 +1,14 @@
 import {z} from "zod";
 
 /**
- * The schema of the configuration object of the application.
- * This is exposed via the ConfigService instance attribute ".config").
+ * The schema of the env variable object for the application.
+ * This is exposed via the EnvironmentService instance attribute ".vars".
  */
-export const ConfigSchema = z.object({
+export const EnvironmentSchema = z.object({
   general: z.object({
     applicationName: z.string(),
     port: z.number(),
-    environment: z.string()
-  }),
-  app: z.object({
-    registrationEnabled: z.boolean(),
+    environment: z.string(),
     allowedOrigins: z.array(z.string().url())
   }),
   database: z.object({
@@ -58,4 +55,4 @@ export const ConfigSchema = z.object({
   }),
 });
 
-export type ConfigSchema = z.infer<typeof ConfigSchema>;
+export type EnvironmentSchema = z.infer<typeof EnvironmentSchema>;

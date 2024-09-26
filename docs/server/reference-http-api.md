@@ -19,8 +19,10 @@ Any errors will be returned with the appropriate status code and the following J
 - `/ [GET]`
 - `/v1 [GET]`
 
-### Server Info
-- `/info [GET]`
+### Server
+- `/v1/server/info [GET]`
+- `/v1/server/health [GET]`
+- `/v1/server/settings [GET, PATCH]`
 
 ### Users
 - `/v1/users [POST, GET]`

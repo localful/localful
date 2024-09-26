@@ -10,7 +10,8 @@ export interface TestMalformedDataConfig {
 export async function testMalformedData(config: TestMalformedDataConfig) {
   const {body, statusCode} = await config.clientFunction(config.endpoint)
     .set("Authorization", `Bearer ${config.accessToken}`)
-    .send("{username: \"test\"[]e}")
-
+    // Explicitly set content type header so an invalid string can be passed as JSON.
+    .set("Content-Type", "application/json")
+    .send("{field: \"value\"[]e}")
   expectBadRequest(body, statusCode);
 }

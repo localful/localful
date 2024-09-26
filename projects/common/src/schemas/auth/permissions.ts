@@ -16,26 +16,26 @@ import {z} from "zod"
  * 		- 'all' signifies that this scope grants permissions to the changes of any user.
  */
 export const Permissions = z.enum([
-	// Scopes limited to the current users content
+	// Scopes limited to the current user
 	"vaults:create",
 	"vaults:retrieve",
 	"vaults:update",
 	"vaults:delete",
 
-	"content:create",
-	"content:retrieve",
-	"content:delete",
+	"item:create",
+	"item:retrieve",
+	"item:delete",
 
-	"versions:create",
-	"versions:retrieve",
-	"versions:delete",
+	"item-version:create",
+	"item-version:retrieve",
+	"item-version:delete",
 
 	"users:create",
 	"users:retrieve",
 	"users:update",
 	"users:delete",
 
-	// Special 'admin' scopes giving access to all content,
+	// Unscoped permissions giving access to all content
 	"vaults:create:all",
 	"vaults:retrieve:all",
 	"vaults:update:all",
@@ -53,6 +53,10 @@ export const Permissions = z.enum([
 	"users:retrieve:all",
 	"users:update:all",
 	"users:delete:all",
+
+	// Other permissions
+	"server-settings:retrieve",
+	"server-settings:update"
 ])
 export type Permissions = z.infer<typeof Permissions>
 
@@ -87,13 +91,13 @@ export const RolePermissions: RolePermissions = {
 			"vaults:update",
 			"vaults:delete",
 
-			"content:create",
-			"content:retrieve",
-			"content:delete",
+			"item:create",
+			"item:retrieve",
+			"item:delete",
 
-			"versions:create",
-			"versions:retrieve",
-			"versions:delete",
+			"item-version:create",
+			"item-version:retrieve",
+			"item-version:delete",
 
 			"users:create",
 			"users:retrieve",
@@ -121,6 +125,9 @@ export const RolePermissions: RolePermissions = {
 			"users:retrieve:all",
 			"users:update:all",
 			"users:delete:all",
+
+			"server-settings:retrieve",
+			"server-settings:update"
 		]
 	}
 }

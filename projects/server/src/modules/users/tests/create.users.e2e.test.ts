@@ -6,7 +6,8 @@ import {expectBadRequest} from "@testing/common/expect-bad-request.js";
 import {testMissingField} from "@testing/common/test-missing-field.js";
 import {testMalformedData} from "@testing/common/test-malformed-data.js";
 import {testInvalidDataTypes} from "@testing/common/test-invalid-data-types.js";
-import {exampleUser1, testUser1} from "@testing/data/users.js";
+import {exampleUser1, testAdminUser1, testUser1} from "@testing/data/users.js";
+import {expectForbidden} from "@testing/common/expect-forbidden.js";
 
 const testHelper: TestHelper = new TestHelper();
 beforeAll(async () => {
@@ -46,9 +47,7 @@ describe("Create User - /v1/users [POST]",() => {
       }))
     })
 
-    test("When adding a valid new user, the returned access and refresh tokens should be valid", async () => {
-      // todo: consider adding access & refresh token data for /v1/users [POST]
-    })
+    test.todo("When adding a valid new user, the returned access and refresh tokens should be valid", async () => {})
 
     test("When using a password that's 12 characters, the new user should be added & returned", async () => {
       const newUser = {
@@ -350,16 +349,24 @@ describe("Create User - /v1/users [POST]",() => {
     })
   })
 
-  // todo: write registration enabled data for /v1/users [POST]
-  // describe("Registration Status", () => {
-  //   test("When registration is enabled, adding a new user should succeed", async () => {
-  //     // todo: populate test
-  //     expect(true).toEqual(false);
-  //   })
-  //
-  //   test("When registration is disabled, adding a new user should fail", async () => {
-  //     // todo: populate test
-  //     expect(true).toEqual(false);
-  //   })
-  // })
+  // todo: test that registrationEnabled setting is respected for /v1/users [POST]
+  describe("Registration Enabled", () => {
+    test("When registration is disabled, adding a new user should fail", async () => {
+      const accessToken = await testHelper.getUserAccessToken(testAdminUser1.id);
+
+      // Update settings to disable registration
+      await testHelper.client
+          .patch("/v1/server/settings")
+          .set("Authorization", `Bearer ${accessToken}`)
+          .send({
+            registrationEnabled: false
+          });
+
+      // Attempt to create a user, which should now fail
+      const {body, statusCode} = await testHelper.client
+          .post("/v1/users")
+          .send(exampleUser1);
+      expectForbidden(body, statusCode, ErrorIdentifiers.USER_REGISTRATION_DISABLED);
+    })
+  })
 })

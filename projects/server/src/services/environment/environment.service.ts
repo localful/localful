@@ -1,8 +1,7 @@
 import * as dotenv from "dotenv";
+import {EnvironmentSchema} from "./environment-schema.js";
+
 dotenv.config();
-
-import {ConfigSchema} from "./config-schema.js";
-
 
 /**
  * A class containing configuration for use across the application.
@@ -11,16 +10,12 @@ import {ConfigSchema} from "./config-schema.js";
  * to be used in the NestJS DI system.
  * The config uses a zod schema, so it will throw an error if the config doesn't follow the schema.
  */
-
-export class ConfigService {
-  readonly config: ConfigSchema = ConfigSchema.parse({
+export class EnvironmentService {
+  readonly vars: EnvironmentSchema = EnvironmentSchema.parse({
     general: {
       applicationName: process.env.APPLICATION_NAME,
       port: parseInt(process.env.PORT as string),
-      environment: process.env.ENVIRONMENT ?? "production"
-    },
-    app: {
-      registrationEnabled: process.env.APP_REGISTRATION_ENABLED === "true",
+      environment: process.env.ENVIRONMENT ?? "production",
       allowedOrigins: process.env.APP_ALLOWED_ORIGINS ? process.env.APP_ALLOWED_ORIGINS.split(",") : []
     },
     database: {

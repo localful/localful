@@ -5,7 +5,7 @@ import {sign} from "jsonwebtoken";
 import {TestHelper} from "@testing/test-helper.js";
 import {testUser1} from "@testing/data/users.js";
 import {expectUnauthorized} from "@testing/common/expect-unauthorized.js";
-import {ConfigService} from "@services/config/config.service.js";
+import {EnvironmentService} from "@services/environment/environment.service.js";
 
 const testHelper = new TestHelper();
 beforeAll(async () => {
@@ -61,10 +61,10 @@ describe("Check Auth",() => {
   })
 
   test("expired access token is unauthorized", async () => {
-    const configService = testHelper.getAppDependency<ConfigService>(ConfigService);
+    const envService = testHelper.getAppDependency<EnvironmentService>(EnvironmentService);
     const accessToken = sign(
       {type: "accessToken", userId: testUser1.id, role: testUser1.role},
-      configService.config.auth.accessToken.secret,
+      envService.vars.auth.accessToken.secret,
       {expiresIn: 0}
     );
 

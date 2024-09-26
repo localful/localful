@@ -1,6 +1,6 @@
 import { WebSocketServer, WebSocket } from "ws";
 import {IncomingMessage, Server} from "node:http";
-import {ConfigService} from "@services/config/config.service.js";
+import {EnvironmentService} from "@services/environment/environment.service.js";
 import {
     ConnectionData,
     InitialConnection,
@@ -35,7 +35,7 @@ export class SyncWebsocketController {
     #rooms: RoomStore = {}
 
     constructor(
-        private readonly configService: ConfigService,
+        private readonly envService: EnvironmentService,
         private readonly syncService:  SyncService,
     ) {}
 
@@ -58,7 +58,7 @@ export class SyncWebsocketController {
         if (
             req.url !== this.#config.path ||
             !req.headers.origin ||
-            !this.configService.config.app.allowedOrigins.includes(req.headers.origin)
+            !this.envService.vars.general.allowedOrigins.includes(req.headers.origin)
         ) {
             // todo: send error response of some kind?
             socket.destroy();

@@ -1,8 +1,8 @@
 import {Redis} from "ioredis";
 
-import {ConfigService} from "@services/config/config.service.js";
+import {EnvironmentService} from "@services/environment/environment.service.js";
 import {SystemError} from "@services/errors/base/system.error.js";
-import {HealthStatus} from "@modules/health-check/health-check.service.js";
+import {HealthStatus} from "@modules/server/server.service.js";
 
 export interface CacheOptions {
   epochExpiry: number;
@@ -12,14 +12,14 @@ export interface CacheOptions {
 export class DataStoreService {
   private redis: Redis | null = null;
 
-  constructor(private configService: ConfigService) {}
+  constructor(private envService: EnvironmentService) {}
 
   private async getRedis(): Promise<Redis> {
     if (this.redis) {
       return this.redis
     }
     else {
-      this.redis = new Redis(this.configService.config.dataStore.redisUrl)
+      this.redis = new Redis(this.envService.vars.dataStore.redisUrl)
       return this.redis
     }
   }

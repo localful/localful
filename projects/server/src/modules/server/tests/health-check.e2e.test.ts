@@ -13,13 +13,13 @@ beforeEach(async () => {
 });
 
 
-describe("Health Check Module",() => {
+describe("Server Module",() => {
   /**
-   * Health Check Route (/v1/health)
+   * Health Check Route (/v1/server/health)
    */
-  describe("/v1/health [GET]", () => {
+  describe("/v1/server/health [GET]", () => {
     test("When a request is made to a healthy server, the response should be an 'ok' health check", async () => {
-      const {body, statusCode} = await testHelper.client.get("/v1/health");
+      const {body, statusCode} = await testHelper.client.get("/v1/server/health");
 
       expect(statusCode).toEqual(200);
       expect(body).toEqual({

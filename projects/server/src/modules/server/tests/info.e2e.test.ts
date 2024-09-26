@@ -13,13 +13,13 @@ beforeEach(async () => {
 });
 
 
-describe("Info Module",() => {
+describe("Server Module",() => {
   /**
-   * Base Route (/)
+   * Info Route (/v1/server/info)
    */
-  describe("/v1/info [GET]", () => {
+  describe("/v1/server/info [GET]", () => {
     test("When a request is made, the response should be info message", async () => {
-      const {body, statusCode} = await testHelper.client.get("/v1/info");
+      const {body, statusCode} = await testHelper.client.get("/v1/server/info");
 
       expect(statusCode).toEqual(200);
       expect(body).toEqual({
@@ -33,6 +33,6 @@ describe("Info Module",() => {
       });
     })
 
-    // @todo: test that registrationEnabled matches the current config?
+    // @todo: test that registrationEnabled matches the current settings?
   })
 })

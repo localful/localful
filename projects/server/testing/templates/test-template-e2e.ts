@@ -3,20 +3,18 @@ import { test, describe, afterAll, beforeAll, beforeEach, expect } from "vitest"
 import {TestHelper} from "@testing/test-helper.js";
 import {testUser1} from "@testing/data/users.js";
 
+const testHelper = new TestHelper();
+beforeAll(async () => {
+  await testHelper.beforeAll();
+});
+afterAll(async () => {
+  await testHelper.afterAll()
+});
+beforeEach(async () => {
+  await testHelper.beforeEach()
+});
 
 describe("Short Description - /v1/path [METHOD]",() => {
-  const testHelper = new TestHelper();
-
-  beforeAll(async () => {
-    await testHelper.beforeAll();
-  });
-  afterAll(async () => {
-    await testHelper.afterAll()
-  });
-  beforeEach(async () => {
-    await testHelper.beforeEach()
-  });
-
   // Testing success cases/happy paths work.
   describe("Success Cases", () => {
 
@@ -36,25 +34,21 @@ describe("Short Description - /v1/path [METHOD]",() => {
 
   })
 
-  // Testing auth & user permissions work.
-  describe("Authentication & Permissions", () => {
-  })
+  // Testing auth & permissions work.
+  describe("Invalid Authentication", () => {})
 
   // Testing all unique constraint work.
-  describe("Unique Validation", () => {})
+  describe("None Unique Data", () => {})
 
-  // Testing all required field work.
-  describe("Required Field Validation", () => {})
-
-  // Testing internal/system fields are not user editable (timestamps, id, owner relationships etc).
-  describe("Forbidden Field Validation", () => {})
-
-  // Testing logical validation works (string formats like email, number ranges, etc)
-  describe("Logical Validation", () => {})
+  // Data validation .
+  describe("Data Validation", () => {})
 
   // Testing relationship validation works (fails on invalid foreign keys).
   describe("Relationship Validation", () => {})
 
+  // Testing internal/system fields are not user editable (timestamps, id, owner relationships etc).
+  describe("Forbidden Fields", () => {})
+
   // Testing invalid type validation works (pass number to sting field, malformed data etc).
-  describe("Type Validation", () => {})
+  describe("Invalid Data", () => {})
 })

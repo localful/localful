@@ -1,5 +1,4 @@
 import {UsersDatabaseService} from "@modules/users/database/users.database.service.js";
-import {ConfigService} from "@services/config/config.service.js";
 import {CreateUserDto, ErrorIdentifiers, UpdateUserDto, UserDto} from "@localful/common";
 import {UserContext} from "@common/request-context.js";
 import {DatabaseCreateUserDto, DatabaseUpdateUserDto, DatabaseUserDto} from "@modules/users/database/database-user.js";
@@ -8,14 +7,15 @@ import {PasswordService} from "@services/password/password.service.js";
 import {AccessControlService} from "@modules/auth/access-control.service.js";
 import {EventsService} from "@services/events/events.service.js";
 import {EventIdentifiers} from "@services/events/events.js";
+import {ServerManagementService} from "@modules/server/server.service.js";
 
 
 export class UsersService {
     constructor(
        private readonly usersDatabaseService: UsersDatabaseService,
-       private readonly configService: ConfigService,
        private readonly accessControlService: AccessControlService,
-       private readonly eventsService: EventsService
+       private readonly eventsService: EventsService,
+       private readonly serverManagementService: ServerManagementService,
     ) {}
 
     convertDatabaseDto(userWithPassword: DatabaseUserDto): UserDto {
@@ -46,7 +46,9 @@ export class UsersService {
 
     async create(createUserDto: CreateUserDto): Promise<UserDto> {
         // todo: add additional permission based access control? an anonymous role and user context would need adding
-        if (!this.configService.config.app.registrationEnabled) {
+
+        const settings = await this.serverManagementService._UNSAFE_getSettings()
+        if (!settings.registrationEnabled) {
             throw new AccessForbiddenError({
                 identifier: ErrorIdentifiers.USER_REGISTRATION_DISABLED,
                 applicationMessage: "User registration is currently disabled."

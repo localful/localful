@@ -15,7 +15,7 @@ GRANT CONNECT ON DATABASE localful TO localful;
 -- Create UUID extension for uuid_generate_v4 support
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Functions for automatically managing created_at and updated_at timestamps
+-- Function to automatically manage updated_at timestamps
 CREATE OR REPLACE FUNCTION update_table_timestamps()
     RETURNS TRIGGER AS $$
 BEGIN
@@ -24,12 +24,34 @@ RETURN NEW;
 END;
 $$ LANGUAGE 'plpgsql';
 
+-- Function to delete rows with a created_at timestamp older than the given row
+CREATE OR REPLACE FUNCTION delete_older_rows()
+    RETURNS TRIGGER AS $$
+BEGIN
+    EXECUTE format('DELETE FROM %I WHERE created_at < %L;', TG_TABLE_NAME, NEW.created_at);
+RETURN null;
+END
+$$ LANGUAGE 'plpgsql';
+
 /**
   User Role Enum
   ----------
   Added to users to control access to resources and actions.
  */
 CREATE TYPE user_roles AS ENUM ('user', 'admin');
+
+/**
+    Server Settings Table
+    -----------
+    Used to store dynamic server settings that can't be set via env vars.
+*/
+CREATE TABLE IF NOT EXISTS settings (
+    id UUID NOT NULL DEFAULT uuid_generate_v4(),
+    registration_enabled BOOLEAN NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT config_pk PRIMARY KEY (id)
+);
+CREATE TRIGGER delete_old_settings AFTER INSERT ON settings FOR EACH ROW EXECUTE PROCEDURE delete_older_rows();
 
 /**
     Users Table

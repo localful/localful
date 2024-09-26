@@ -4,14 +4,13 @@ import cors from "cors";
 import express, {NextFunction, Request, Response} from "express";
 import {ErrorIdentifiers} from "@localful/common";
 
-import {ConfigService} from "@services/config/config.service.js";
+import {EnvironmentService} from "@services/environment/environment.service.js";
 import {DataStoreService} from "@services/data-store/data-store.service.js";
 import {DatabaseService} from "@services/database/database.service.js";
 import {EmailService} from "@services/email/email.service.js";
 import {PasswordService} from "@services/password/password.service.js";
 import {TokenService} from "@services/token/token.service.js";
 import {BaseHttpController} from "@modules/base/base.http.js";
-import {InfoHttpController} from "@modules/info/info.http.js";
 import {AuthService} from "@modules/auth/auth.service.js";
 import {UsersService} from "@modules/users/users.service.js";
 import {AccessControlService} from "@modules/auth/access-control.service.js";
@@ -28,8 +27,9 @@ import {SyncWebsocketController} from "@modules/sync/sync.websockets.js";
 import {EventsService} from "@services/events/events.service.js";
 import {SyncService} from "@modules/sync/sync.service.js";
 import {SyncHttpController} from "@modules/sync/sync.http.js";
-import {HealthCheckService} from "@modules/health-check/health-check.service.js";
-import {HealthCheckHttpController} from "@modules/health-check/health-check.http.js";
+import {ServerManagementService} from "@modules/server/server.service.js";
+import {ServerManagementHttpController} from "@modules/server/server.http.js";
+import {ServerManagementDatabaseService} from "@modules/server/database/server.database.service.js";
 
 
 /**
@@ -57,32 +57,30 @@ export class Application {
         this.container = new PumpIt()
 
         // Global services
-        this.container.bindClass(ConfigService, { value: ConfigService}, {scope: "SINGLETON"})
-        this.container.bindClass(DataStoreService, { value: DataStoreService, inject: [ConfigService]}, {scope: "SINGLETON"})
-        this.container.bindClass(DatabaseService, { value: DatabaseService, inject: [ConfigService]}, {scope: "SINGLETON"})
-        this.container.bindClass(EmailService, { value: EmailService, inject: [ConfigService]}, {scope: "SINGLETON"})
+        this.container.bindClass(EnvironmentService, { value: EnvironmentService}, {scope: "SINGLETON"})
+        this.container.bindClass(DataStoreService, { value: DataStoreService, inject: [EnvironmentService]}, {scope: "SINGLETON"})
+        this.container.bindClass(DatabaseService, { value: DatabaseService, inject: [EnvironmentService]}, {scope: "SINGLETON"})
+        this.container.bindClass(EmailService, { value: EmailService, inject: [EnvironmentService]}, {scope: "SINGLETON"})
         this.container.bindClass(PasswordService, { value: PasswordService}, {scope: "SINGLETON"})
-        this.container.bindClass(TokenService, { value: TokenService, inject: [ConfigService, DataStoreService]}, {scope: "SINGLETON"})
+        this.container.bindClass(TokenService, { value: TokenService, inject: [EnvironmentService, DataStoreService]}, {scope: "SINGLETON"})
         this.container.bindClass(EventsService, { value: EventsService }, {scope: "SINGLETON"})
+
+        // Server module
+        this.container.bindClass(ServerManagementDatabaseService, { value: ServerManagementDatabaseService, inject: [DatabaseService] }, {scope: "SINGLETON"})
+        this.container.bindClass(ServerManagementService, { value: ServerManagementService, inject: [DatabaseService, DataStoreService, AccessControlService, ServerManagementDatabaseService] }, {scope: "SINGLETON"})
+        this.container.bindClass(ServerManagementHttpController, { value: ServerManagementHttpController, inject: [AccessControlService, ServerManagementService] }, {scope: "SINGLETON"})
 
         // Base module
         this.container.bindClass(BaseHttpController, { value: BaseHttpController}, {scope: "SINGLETON"})
 
-        // Info module
-        this.container.bindClass(InfoHttpController, { value: InfoHttpController, inject: [ConfigService]}, {scope: "SINGLETON"})
-
-        // Health check module
-        this.container.bindClass(HealthCheckService, { value: HealthCheckService, inject: [DatabaseService, DataStoreService] }, {scope: "SINGLETON"})
-        this.container.bindClass(HealthCheckHttpController, { value: HealthCheckHttpController, inject: [HealthCheckService] }, {scope: "SINGLETON"})
-
         // Auth module
-        this.container.bindClass(AuthService, { value: AuthService, inject: [UsersService, TokenService, ConfigService, EmailService, EventsService]}, {scope: "SINGLETON"})
+        this.container.bindClass(AuthService, { value: AuthService, inject: [UsersService, TokenService, EnvironmentService, EmailService, EventsService]}, {scope: "SINGLETON"})
         this.container.bindClass(AccessControlService, { value: AccessControlService, inject: [UsersDatabaseService, TokenService] }, {scope: "SINGLETON"})
         this.container.bindClass(AuthHttpController, { value: AuthHttpController, inject: [AuthService, AccessControlService]}, {scope: "SINGLETON"})
 
         // Users module
         this.container.bindClass(UsersDatabaseService, { value: UsersDatabaseService, inject: [DatabaseService]}, {scope: "SINGLETON"})
-        this.container.bindClass(UsersService, { value: UsersService, inject: [UsersDatabaseService, ConfigService, AccessControlService, EventsService]}, {scope: "SINGLETON"})
+        this.container.bindClass(UsersService, { value: UsersService, inject: [UsersDatabaseService, AccessControlService, EventsService, ServerManagementService]}, {scope: "SINGLETON"})
         this.container.bindClass(UsersHttpController, { value: UsersHttpController, inject: [UsersService, TokenService, AccessControlService]}, {scope: "SINGLETON"})
 
         // Vault module
@@ -93,7 +91,7 @@ export class Application {
         // Sync module
         this.container.bindClass(SyncService, {value: SyncService, inject: [EventsService, DataStoreService, VaultsDatabaseService]}, {scope: "SINGLETON"})
         this.container.bindClass(SyncHttpController, {value: SyncHttpController, inject: [AccessControlService, SyncService]}, {scope: "SINGLETON"})
-        this.container.bindClass(SyncWebsocketController, { value: SyncWebsocketController, inject: [ConfigService, SyncService] }, {scope: "SINGLETON"})
+        this.container.bindClass(SyncWebsocketController, { value: SyncWebsocketController, inject: [EnvironmentService, SyncService] }, {scope: "SINGLETON"})
     }
 
     /**
@@ -108,8 +106,8 @@ export class Application {
         app.disable("x-powered-by")
 
         // Cors setup
-        const configService = this.container.resolve<ConfigService>(ConfigService);
-        const corsOptions = createCorsOptions(configService)
+        const envService = this.container.resolve<EnvironmentService>(EnvironmentService);
+        const corsOptions = createCorsOptions(envService)
         app.use(cors(corsOptions))
 
         // GNU Terry Pratchett (http://www.gnuterrypratchett.com/)
@@ -123,13 +121,12 @@ export class Application {
         app.get("/", baseHttpController.sendWelcomeMessage.bind(baseHttpController))
         app.get("/v1", baseHttpController.sendWelcomeMessage.bind(baseHttpController))
 
-        // Info module routes
-        const infoHttpController = this.container.resolve<InfoHttpController>(InfoHttpController);
-        app.get("/v1/info", infoHttpController.getInfo.bind(infoHttpController));
-
-        // Health check routes
-        const healthCheckHttpController = this.container.resolve<HealthCheckHttpController>(HealthCheckHttpController);
-        app.get("/v1/health", healthCheckHttpController.requestHealthCheck.bind(healthCheckHttpController));
+        // Server module routes
+        const serverManagementHttpController = this.container.resolve<ServerManagementHttpController>(ServerManagementHttpController);
+        app.get("/v1/server/info", serverManagementHttpController.getInfo.bind(serverManagementHttpController));
+        app.get("/v1/server/health", serverManagementHttpController.requestHealthCheck.bind(serverManagementHttpController));
+        app.get("/v1/server/settings", serverManagementHttpController.getSettings.bind(serverManagementHttpController));
+        app.patch("/v1/server/settings", serverManagementHttpController.updateSettings.bind(serverManagementHttpController));
 
         // Auth module routes
         const authHttpController = this.container.resolve<AuthHttpController>(AuthHttpController);

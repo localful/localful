@@ -1,5 +1,5 @@
 import {TokenService} from "@services/token/token.service.js";
-import {ConfigService} from "@services/config/config.service.js";
+import {EnvironmentService} from "@services/environment/environment.service.js";
 import {EmailService} from "@services/email/email.service.js";
 import {AuthUserResponse, ErrorIdentifiers, TokenPair} from "@localful/common";
 import {DatabaseUserDto} from "@modules/users/database/database-user.js";
@@ -17,7 +17,7 @@ export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly tokenService: TokenService,
-    private readonly configService: ConfigService,
+    private readonly envService: EnvironmentService,
     private readonly emailService: EmailService,
     private readonly eventsService: EventsService
   ) {
@@ -119,15 +119,15 @@ export class AuthService {
     const verificationToken = await this.tokenService.getActionToken({
       userId: user.id,
       actionType: "verify-email",
-      secret: this.configService.config.auth.emailVerification.secret,
-      expiry: this.configService.config.auth.emailVerification.expiry
+      secret: this.envService.vars.auth.emailVerification.secret,
+      expiry: this.envService.vars.auth.emailVerification.expiry
     })
 
-    const verificationUrl = `${this.configService.config.auth.emailVerification.url}#${verificationToken}`
+    const verificationUrl = `${this.envService.vars.auth.emailVerification.url}#${verificationToken}`
 
     await this.emailService.sendEmail({
       to: user.email,
-      subject: `Account verification for ${this.configService.config.general.applicationName}`,
+      subject: `Account verification for ${this.envService.vars.general.applicationName}`,
       message: `To verify your account you can follow this link: ${verificationUrl}`,
     })
   }
@@ -142,7 +142,7 @@ export class AuthService {
       })
     }
 
-    const tokenPayload = await this.tokenService.validateAndDecodeActionToken(actionToken, this.configService.config.auth.emailVerification.secret)
+    const tokenPayload = await this.tokenService.validateAndDecodeActionToken(actionToken, this.envService.vars.auth.emailVerification.secret)
     if (!tokenPayload) {
       throw new UserRequestError({
         identifier: ErrorIdentifiers.AUTH_TOKEN_INVALID,

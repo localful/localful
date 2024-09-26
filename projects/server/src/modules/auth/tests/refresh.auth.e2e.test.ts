@@ -9,7 +9,7 @@ import {testUser1} from "@testing/data/users.js";
 import {expectUnauthorized} from "@testing/common/expect-unauthorized.js";
 import {expectBadRequest} from "@testing/common/expect-bad-request.js";
 import {testInvalidDataTypes} from "@testing/common/test-invalid-data-types.js";
-import {ConfigService} from "@services/config/config.service.js";
+import {EnvironmentService} from "@services/environment/environment.service.js";
 
 // todo: remove direct use of DI container?
 
@@ -98,10 +98,10 @@ describe("Refresh Auth",() => {
 
     test("When supplying an expired refreshToken, the request should fail", async () => {
       // Create an expired token with the correct payload & sign it correctly
-      const configService = testHelper.getAppDependency<ConfigService>(ConfigService);
+      const envService = testHelper.getAppDependency<EnvironmentService>(EnvironmentService);
       const refreshToken = sign(
         {userId: testUser1.id, type: "refreshToken"},
-        configService.config.auth.refreshToken.secret,
+        envService.vars.auth.refreshToken.secret,
         {expiresIn: 0}
       );
 
