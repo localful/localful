@@ -11,36 +11,36 @@ Expect bugs, missing docs, incomplete features etc!</p>
 <div align="center">
   <h1>Localful</h1>
   <p>Full-stack tooling for building local-first web apps with a focus on simplicity, interoperability and longevity.</p>
-    <a href="./docs/use-cases.md">Use Cases</a> |
   <a href="./docs/quick-start.md">Quick Start</a> |
-  <a href="./docs/readme.md">Documentation</a> |
+  <a href="./docs/README.md">Documentation</a> |
   <a href="./docs/examples.md">Examples</a> |
-  <a href="./docs/local/encryption/specification.md">Encryption Spec</a> |
-  <a href="./docs/roadmap.md">Roadmap</a>
-</div>
+  <a href="https://github.com/localful/localful/issues/6">Roadmap</a>
+</div>  
 
-## Why?
 
-- **Simplicity**  
+There are lots of tools to help you develop local-first web applications, however these often require building around CRDTs, eventual consistency, conflict resolution and other concepts
+which fundamentally change how you build apps, and how you store and manage data.  
+These concepts are incredibly powerful and useful when needed, but can introduce a new world of complexity for both developers and end users when your use case doesn't require them.  
 
-  Software should be simple. Localful doesn't use CRDTs or an advanced distributed database, it accepts the tradeoffs and limitations of a simpler system to store and syncronise data using immutable versions which are created when data is changed. This allows you to easily understand what's going on and how, so you can spend less time thinking and more time making.
-  
-- **Interoperability**  
+Localful aims to offer a pragmatic and more basic approach for developing local-fist web applications by creating
+immutable versions when data is changed. To learn more, checkout the [overview docs](./docs/overview.md).
 
-  Your data is yours and should be avaliable without vendor or technology lock-in. Keeping things simple means less reliance on any specific library, langauge or implementation. The web library uses standard IndexDB and the server uses Postgres and a well documented HTTP and Websockets (socket.io) API. The current focus of Localful is on web applications, however the server could be used by anything that speaks HTTP and Websockets.
-
-- **Longevity**  
-
-  If you don't need to manage lots of complexity and build software with interoperability in mind, then you can be confident that your applications will be easier to manage in the long term and your data will continue to be accesible. If you do decide to migrate in the future, you have everything stored in IndexDB and Postgres ready and waiting.
 
 ## Key Features
-- Local-first storage using IndexDB.
-- Client-side encryption, including locally in IndexDB.
-- Schema definitions using [Zod](https://zod.dev/).
-- Migration support for schemas and data.
-- Basic local queries with support with filtering, ordering, grouping etc.
-- Built-in reactivity for local data fetching via [RxJS Observables](https://rxjs.dev/).
-- Self-hostable Node.js server for account creation, data storage and cross-device synchronisation.
+- "Device" library for the web which includes:
+  - Local-first storage using IndexDB.
+  - Client-side encryption, including locally at rest.
+  - The ability to define tables and schemas, including support for schema and data migrations.
+  - Basic data queries with support for filtering, ordering, grouping etc.
+  - Built-in reactivity for local data fetching via [Observables](https://rxjs.dev/) which allows for easy integration into frameworks like React.
+- Self-hosted Node.js server which includes:
+  - Data backup and cross-device synchronisation features
+  - Traditional user account system (using email & password) for controlling ability to access and use the server
+  - Ability to completely disable user registration to allow for personal-only use
+
+Important notes:
+- The device library can be used completely in isolation without a server being set up, it is local-first after all!  
+- Each distinct web app currently requires its own server instance and the server is built to be self-hosted.
 
 ## Contributions
 
