@@ -6,9 +6,9 @@
 Expect bugs, missing docs, incomplete features etc!</p>
 </div>
 
---- 
+---
 
-<br>
+<br/>
 <div align="center">
   <h1>Localful</h1>
   <p>Full-stack tooling for building local-first web apps with a focus on simplicity, interoperability and longevity.</p>
@@ -17,7 +17,7 @@ Expect bugs, missing docs, incomplete features etc!</p>
   <a href="./docs/examples.md">Examples</a> |
   <a href="https://github.com/localful/localful/issues/6">Roadmap</a>
 </div>  
-<br>
+<br/>
 
 
 There are lots of tools to help you develop local-first web applications, however these often require building around CRDTs, eventual consistency, conflict resolution and other concepts
