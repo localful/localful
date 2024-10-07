@@ -142,7 +142,7 @@ describe("Create User - /v1/users [POST]",() => {
       expectBadRequest(body, statusCode)
     })
 
-    // todo: add boundary tests for this
+    // todo: add boundary tests for password min length
     test("When using a password that's too short, the request should fail", async () => {
       const newUser = {
         ...exampleUser1,
@@ -156,7 +156,7 @@ describe("Create User - /v1/users [POST]",() => {
       expectBadRequest(body, statusCode)
     })
 
-    // @todo: add max length to email schema and re-add this test
+    // todo: add max length to email schema and re-add this test
     // test("When using a email that's too long, the request should fail", async () => {
     //   const newUser = {
     //     ...exampleUser1,
@@ -349,7 +349,6 @@ describe("Create User - /v1/users [POST]",() => {
     })
   })
 
-  // todo: test that registrationEnabled setting is respected for /v1/users [POST]
   describe("Registration Enabled", () => {
     test("When registration is disabled, adding a new user should fail", async () => {
       const accessToken = await testHelper.getUserAccessToken(testAdminUser1.id);

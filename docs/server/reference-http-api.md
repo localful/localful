@@ -7,7 +7,7 @@ Any errors will be returned with the appropriate status code and the following J
 ```json5
 {
   "statusCode": 404, // a copy of the HTTP status code.
-  "identifier": "RESOURCE_NOT_FOUND", // an identifier for the specific error.
+  "identifier": "resource-not-found", // an identifier for the specific error.
   "message": "An error occurred.", // a message explaining the error.
   "context": null // an optional property of any type which may contain extra information about why the error occurred.
 }
@@ -44,7 +44,5 @@ Any errors will be returned with the appropriate status code and the following J
 ### Items
 - `/v1/items [GET, POST]`
 - `/v1/items/:itemId [GET, DELETE]`
-
-### Item Versions
-- `/v1/versions [GET, POST]`
+- `/v1/versions/:itemId [GET, DELETE]`
 - `/v1/versions/:versionId [GET, DELETE]`

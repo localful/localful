@@ -10,15 +10,18 @@ server for syncing content between devices, backing up content to the server and
 ## Setting up the app
 
 ```bash
-# setup database
-# this will create an `localful` user & db, you can edit the script as required
-$ cp ./scripts/example.setup.sql ./scripts/example.setup.sql
+# === setup database ===
+
+# this script will create a `localful` user & database, alternatively create your own database and set the env vars accordingly.
 $ psql postgres -f < ./scripts/setup.sql
 
-# install dependencies
+# run database migrations to setup the required tables in your database
+$ psql postgres -f < ./migrations/000-v1-schema.sql
+
+# === install dependencies ===
 $ npm install
 
-# setup environment
+# === setup environment ===
 # you will have to configure the AUTH_ variables and DATABASE_URL if you edited the setup.sql script
 $ cp .env.example .env
 ```
@@ -26,13 +29,16 @@ $ cp .env.example .env
 ## Running the app
 
 ```bash
-# development mode - run the app via tsx and restart on changes
+# === development mode ===
+# run the app via tsx and restart on changes
 $ npm run start
 
-# build - will build the app using tsc then tsc-alias (which fixes alias/path imports in the build)
-$ npm run start:prod
+# === production build ===
+# will build the app using tsc then tsc-alias (which fixes alias/path imports in the build)
+$ npm run build
 
-# start production mode - will run the build directly using node
+# === run the production build ===
+# will run the build directly using node
 $ npm run start:prod
 ```
 
@@ -42,9 +48,11 @@ $ npm run start:prod
 # run all tests
 $ npm run test
 
-# run e2e tests - tests that load the full application (via a test helper which provides setup/teardown and utility functions), make requests using supertest like a real API user, and assert on the results
+# === run e2e tests ===
+# tests that load the full application (via a test helper which provides setup/teardown and utility functions), make requests using supertest like a real API user, and assert on the results
 $ npm run test:e2e
 
-# run unit tests - tests which focus on isolated functionality directly, covering cases E2E tests miss and features which benefit from internal testing
+# === run unit tests ===
+# tests which focus on isolated functionality directly, covering cases E2E tests miss and features which benefit from internal testing
 $ npm run test:unit
 ```

@@ -1,4 +1,4 @@
-import {UserDto, VaultDto} from "@localful/common";
+import {ItemDto, ItemVersionDto, UserDto, VaultDto} from "@localful/common";
 
 export const EventIdentifiers = {
     // Auth Events
@@ -16,8 +16,8 @@ export const EventIdentifiers = {
     ITEM_CREATE: "item-create",
     ITEM_DELETE: "item-delete",
     // Version Events
-    VERSION_CREATE: "version-create",
-    VERSION_DELETE: "version-delete",
+    ITEM_VERSION_CREATE: "item-version-create",
+    ITEM_VERSION_DELETE: "item-version-delete",
 } as const
 
 export interface AuthLoginEvent {
@@ -75,10 +75,45 @@ export interface VaultDeleteEvent {
     detail: {
         sessionId: string
         vaultId: string
-        // This is required to allow places like SyncService to know what users to inform of this action
+        // This is required to allow consumers to know what users to inform of this action
         ownerId: string
     }
 }
+
+export interface ItemCreateEvent {
+    type: typeof EventIdentifiers.ITEM_CREATE,
+    detail: {
+        sessionId: string
+        item: ItemDto
+    }
+}
+export interface ItemDeleteEvent {
+    type: typeof EventIdentifiers.ITEM_DELETE,
+    detail: {
+        sessionId: string
+        // This is required to allow consumers to know what vault this event occurred in
+        vaultId: string
+        itemId: string
+    }
+}
+
+export interface ItemVersionCreateEvent {
+    type: typeof EventIdentifiers.ITEM_VERSION_CREATE,
+    detail: {
+        sessionId: string
+        version: ItemVersionDto
+    }
+}
+export interface ItemVersionDeleteEvent {
+    type: typeof EventIdentifiers.ITEM_VERSION_DELETE,
+    detail: {
+        sessionId: string
+        // This is required to allow consumers to know what vault this event occurred in
+        vaultId: string
+        versionId: string
+    }
+}
+
 
 export interface EventMap {
     // Auth events
@@ -92,9 +127,21 @@ export interface EventMap {
     [EventIdentifiers.VAULT_CREATE]: VaultCreateEvent,
     [EventIdentifiers.VAULT_UPDATE]: VaultUpdateEvent,
     [EventIdentifiers.VAULT_DELETE]: VaultDeleteEvent,
+    // Item events
+    [EventIdentifiers.ITEM_CREATE]: ItemCreateEvent,
+    [EventIdentifiers.ITEM_DELETE]: ItemDeleteEvent,
+    [EventIdentifiers.ITEM_VERSION_CREATE]: ItemVersionCreateEvent,
+    [EventIdentifiers.ITEM_VERSION_DELETE]: ItemVersionDeleteEvent,
 }
 
-export type ServerEvent = AuthLoginEvent | AuthLogoutEvent | UserCreateEvent | UserUpdateEvent | UserDeleteEvent | VaultCreateEvent | VaultUpdateEvent | VaultDeleteEvent;
+export type ServerEvent =
+  AuthLoginEvent | AuthLogoutEvent |
+  UserCreateEvent | UserUpdateEvent | UserDeleteEvent |
+  VaultCreateEvent | VaultUpdateEvent | VaultDeleteEvent |
+  ItemCreateEvent | ItemDeleteEvent | ItemVersionCreateEvent | ItemVersionDeleteEvent;
 export type EventIdentifiers = keyof EventMap
 
-export type ExternalServerEvent  =  UserUpdateEvent | UserDeleteEvent | VaultCreateEvent | VaultUpdateEvent | VaultDeleteEvent
+export type ExternalServerEvent =
+  UserUpdateEvent | UserDeleteEvent |
+  VaultCreateEvent | VaultUpdateEvent | VaultDeleteEvent |
+  ItemCreateEvent | ItemDeleteEvent | ItemVersionCreateEvent | ItemVersionDeleteEvent;

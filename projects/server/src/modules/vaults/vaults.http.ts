@@ -18,8 +18,8 @@ export class VaultsHttpController {
 
   async createVault(req: Request, res: Response, next: NextFunction) {
     try {
-      const createVaultDto = await validateSchema(req.body, CreateVaultDto);
       const requestUser = await this.accessControlService.validateAuthentication(req);
+      const createVaultDto = await validateSchema(req.body, CreateVaultDto);
 
       const result = await this.vaultsService.create(requestUser, createVaultDto);
       res.status(HttpStatusCodes.CREATED).json(result);
@@ -31,8 +31,8 @@ export class VaultsHttpController {
 
   async getVault(req: Request, res: Response, next: NextFunction) {
     try {
-      const params = await validateSchema(req.params, VaultsURLParams);
       const requestUser = await this.accessControlService.validateAuthentication(req);
+      const params = await validateSchema(req.params, VaultsURLParams);
 
       const result = await this.vaultsService.get(requestUser, params.vaultId);
       res.status(HttpStatusCodes.OK).json(result);
@@ -44,9 +44,9 @@ export class VaultsHttpController {
 
   async updateVault(req: Request, res: Response, next: NextFunction) {
     try {
+      const requestUser = await this.accessControlService.validateAuthentication(req);
       const params = await validateSchema(req.params, VaultsURLParams);
       const updateVaultDto = await validateSchema(req.body, UpdateVaultDto);
-      const requestUser = await this.accessControlService.validateAuthentication(req);
 
       const result = await this.vaultsService.update(requestUser, params.vaultId, updateVaultDto);
       res.status(HttpStatusCodes.OK).json(result);
@@ -58,8 +58,8 @@ export class VaultsHttpController {
 
   async deleteVault(req: Request, res: Response, next: NextFunction) {
     try {
-      const params = await validateSchema(req.params, VaultsURLParams);
       const requestUser = await this.accessControlService.validateAuthentication(req);
+      const params = await validateSchema(req.params, VaultsURLParams);
 
       const result = await this.vaultsService.delete(requestUser, params.vaultId);
       res.status(HttpStatusCodes.OK).json(result);

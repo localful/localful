@@ -30,6 +30,9 @@ import {SyncHttpController} from "@modules/sync/sync.http.js";
 import {ServerManagementService} from "@modules/server/server.service.js";
 import {ServerManagementHttpController} from "@modules/server/server.http.js";
 import {ServerManagementDatabaseService} from "@modules/server/database/server.database.service.js";
+import {ItemsService} from "@modules/items/items.service.js";
+import {ItemsHttpController} from "@modules/items/items.http.js";
+import {ItemsDatabaseService} from "@modules/items/database/items.database.service.js";
 
 
 /**
@@ -88,6 +91,11 @@ export class Application {
         this.container.bindClass(VaultsService, { value: VaultsService, inject: [VaultsDatabaseService, AccessControlService, EventsService]}, {scope: "SINGLETON"})
         this.container.bindClass(VaultsHttpController, { value: VaultsHttpController, inject: [VaultsService, AccessControlService]}, {scope: "SINGLETON"})
 
+        // Items module
+        this.container.bindClass(ItemsDatabaseService, {value: ItemsDatabaseService, inject: [DatabaseService]}, {scope: "SINGLETON"})
+        this.container.bindClass(ItemsService, {value: ItemsService, inject: [AccessControlService, EventsService, ItemsDatabaseService, VaultsService]}, {scope: "SINGLETON"})
+        this.container.bindClass(ItemsHttpController, {value: ItemsHttpController, inject: []}, {scope: "SINGLETON"})
+
         // Sync module
         this.container.bindClass(SyncService, {value: SyncService, inject: [EventsService, DataStoreService, VaultsDatabaseService]}, {scope: "SINGLETON"})
         this.container.bindClass(SyncHttpController, {value: SyncHttpController, inject: [AccessControlService, SyncService]}, {scope: "SINGLETON"})
@@ -143,17 +151,26 @@ export class Application {
 
         // Users module routes
         const usersHttpController = this.container.resolve<UsersHttpController>(UsersHttpController);
-        app.get("/v1/users/:userId", usersHttpController.getUser.bind(usersHttpController))
         app.post("/v1/users", usersHttpController.createUser.bind(usersHttpController))
+        app.get("/v1/users/:userId", usersHttpController.getUser.bind(usersHttpController))
         app.patch("/v1/users/:userId", usersHttpController.updateUser.bind(usersHttpController))
         app.delete("/v1/users/:userId", usersHttpController.deleteUser.bind(usersHttpController));
 
         // Vaults module routes
         const vaultsHttpController = this.container.resolve<VaultsHttpController>(VaultsHttpController);
-        app.get("/v1/vaults/:vaultId", vaultsHttpController.getVault.bind(vaultsHttpController))
         app.post("/v1/vaults", vaultsHttpController.createVault.bind(vaultsHttpController))
+        app.get("/v1/vaults/:vaultId", vaultsHttpController.getVault.bind(vaultsHttpController))
         app.patch("/v1/vaults/:vaultId", vaultsHttpController.updateVault.bind(vaultsHttpController))
         app.delete("/v1/vaults/:vaultId", vaultsHttpController.deleteVault.bind(vaultsHttpController));
+
+        // Items module routes
+        const itemsHttpController = this.container.resolve<ItemsHttpController>(ItemsHttpController);
+        app.post("/v1/items", itemsHttpController.createItem.bind(itemsHttpController))
+        app.get("/v1/items/:itemId", itemsHttpController.getItem.bind(itemsHttpController))
+        app.delete("/v1/items/:itemId", itemsHttpController.deleteItem.bind(itemsHttpController))
+        app.get("/v1/versions", itemsHttpController.createVersion.bind(itemsHttpController))
+        app.get("/v1/versions/:versionId", itemsHttpController.getVersion.bind(itemsHttpController))
+        app.get("/v1/versions/:versionId", itemsHttpController.deleteVersion.bind(itemsHttpController))
 
         // Sync module routes and websocket server
         const syncHttpController = this.container.resolve<SyncHttpController>(SyncHttpController)

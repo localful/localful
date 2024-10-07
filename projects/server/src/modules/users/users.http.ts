@@ -34,8 +34,8 @@ export class UsersHttpController {
 
   async getUser(req: Request, res: Response, next: NextFunction) {
     try {
-      const params = await validateSchema(req.params, UsersURLParams);
       const requestUser = await this.accessControlService.validateAuthentication(req);
+      const params = await validateSchema(req.params, UsersURLParams);
 
       const user = await this.usersService.get(requestUser, params.userId);
       res.status(HttpStatusCodes.OK).json(user)
@@ -47,9 +47,9 @@ export class UsersHttpController {
 
   async updateUser(req: Request, res: Response, next: NextFunction) {
     try {
+      const requestUser = await this.accessControlService.validateAuthentication(req);
       const params = await validateSchema(req.params, UsersURLParams);
       const updateUserDto = await validateSchema(req.body, UpdateUserDto);
-      const requestUser = await this.accessControlService.validateAuthentication(req);
 
       const result = await this.usersService.update(requestUser, params.userId, updateUserDto);
       res.status(HttpStatusCodes.OK).json(result)
@@ -61,8 +61,8 @@ export class UsersHttpController {
 
   async deleteUser(req: Request, res: Response, next: NextFunction) {
     try {
-      const params = await validateSchema(req.params, UsersURLParams);
       const requestUser = await this.accessControlService.validateAuthentication(req);
+      const params = await validateSchema(req.params, UsersURLParams);
 
       await this.usersService.delete(requestUser, params.userId);
       res.sendStatus(HttpStatusCodes.OK)
