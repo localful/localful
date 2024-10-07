@@ -75,7 +75,7 @@ export class ItemsDatabaseService {
 		return {
 			id: version.id,
 			itemId: version.item_id,
-			createdBy: version.created_by,
+			deviceName: version.device_name,
 			protectedData: version.protected_data,
 			createdAt: version.created_at,
 			deletedAt: version.deleted_at,
@@ -87,7 +87,7 @@ export class ItemsDatabaseService {
 		return {
 			id: version.id,
 			itemId: version.item_id,
-			createdBy: version.created_by,
+			deviceName: version.device_name,
 			protectedData: version.protected_data,
 			createdAt: version.created_at,
 			deletedAt: version.deleted_at,
@@ -272,8 +272,8 @@ export class ItemsDatabaseService {
 		let result: InternalDatabaseItemVersion[] = [];
 		try {
 			result = await sql<InternalDatabaseItemVersion[]>`
-          INSERT INTO item_versions(id, created_at, created_by, protected_data, item_id)
-          VALUES (${itemVersionDto.id}, ${itemVersionDto.createdAt}, ${itemVersionDto.createdBy}, ${itemVersionDto.protectedData}, ${itemVersionDto.itemId})
+          INSERT INTO item_versions(id, created_at, device_name, protected_data, item_id)
+          VALUES (${itemVersionDto.id}, ${itemVersionDto.createdAt}, ${itemVersionDto.deviceName}, ${itemVersionDto.protectedData}, ${itemVersionDto.itemId})
           RETURNING *;
 			`;
 		}

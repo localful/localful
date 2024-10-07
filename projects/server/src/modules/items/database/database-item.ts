@@ -21,7 +21,7 @@ export interface ItemDtoWithOwner extends ItemDto {
 export interface InternalDatabaseItemVersion {
 	id: string
 	item_id: string
-	created_by: string
+	device_name: string
 	protected_data: string
 	created_at: string
 	deleted_at: string
