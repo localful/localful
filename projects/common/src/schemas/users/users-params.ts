@@ -1,5 +1,5 @@
 import {z} from "zod";
-import {ResourceListingParams} from "../common/params";
+import {ResourceListingParams} from "../common/listings";
 
 export const UsersURLParams = z.object({
   userId: z.string().uuid("userId must be a uuid"),

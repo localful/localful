@@ -1,4 +1,7 @@
 
+export * from "./schemas/common/fields"
+export * from "./schemas/common/listings"
+
 export * from "./errors/error-identifiers";
 
 export * from "./schemas/info";
@@ -19,5 +22,5 @@ export * from "./schemas/vaults/vaults-params"
 
 export * from "./schemas/items/items"
 export * from "./schemas/items/items-params"
-export * from "./schemas/items/item-versions"
-export * from "./schemas/items/item-versions-params"
+export * from "./schemas/items/versions"
+export * from "./schemas/items/versions-params"

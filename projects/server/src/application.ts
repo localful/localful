@@ -94,7 +94,7 @@ export class Application {
         // Items module
         this.container.bindClass(ItemsDatabaseService, {value: ItemsDatabaseService, inject: [DatabaseService]}, {scope: "SINGLETON"})
         this.container.bindClass(ItemsService, {value: ItemsService, inject: [AccessControlService, EventsService, ItemsDatabaseService, VaultsService]}, {scope: "SINGLETON"})
-        this.container.bindClass(ItemsHttpController, {value: ItemsHttpController, inject: []}, {scope: "SINGLETON"})
+        this.container.bindClass(ItemsHttpController, {value: ItemsHttpController, inject: [ItemsService, AccessControlService]}, {scope: "SINGLETON"})
 
         // Sync module
         this.container.bindClass(SyncService, {value: SyncService, inject: [EventsService, DataStoreService, VaultsDatabaseService]}, {scope: "SINGLETON"})
@@ -166,11 +166,14 @@ export class Application {
         // Items module routes
         const itemsHttpController = this.container.resolve<ItemsHttpController>(ItemsHttpController);
         app.post("/v1/items", itemsHttpController.createItem.bind(itemsHttpController))
+        app.get("/v1/items", itemsHttpController.getItems.bind(itemsHttpController))
         app.get("/v1/items/:itemId", itemsHttpController.getItem.bind(itemsHttpController))
         app.delete("/v1/items/:itemId", itemsHttpController.deleteItem.bind(itemsHttpController))
-        app.get("/v1/versions", itemsHttpController.createVersion.bind(itemsHttpController))
+
+        app.post("/v1/versions", itemsHttpController.createVersion.bind(itemsHttpController))
+        app.get("/v1/versions", itemsHttpController.getVersions.bind(itemsHttpController))
         app.get("/v1/versions/:versionId", itemsHttpController.getVersion.bind(itemsHttpController))
-        app.get("/v1/versions/:versionId", itemsHttpController.deleteVersion.bind(itemsHttpController))
+        app.delete("/v1/versions/:versionId", itemsHttpController.deleteVersion.bind(itemsHttpController))
 
         // Sync module routes and websocket server
         const syncHttpController = this.container.resolve<SyncHttpController>(SyncHttpController)

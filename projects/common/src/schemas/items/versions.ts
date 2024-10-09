@@ -1,7 +1,7 @@
 import {z} from "zod";
 import {createDateField, createIdField, ProtectedDataField} from "../common/fields";
 
-export const ItemVersionDto = z.object({
+export const VersionDto = z.object({
   id: createIdField(),
   itemId: createIdField("itemId"),
   createdAt: createDateField('createdAt'),
@@ -12,4 +12,4 @@ export const ItemVersionDto = z.object({
   protectedData: ProtectedDataField.nullable(),
   deletedAt: createDateField('deletedAt').nullable(),
 }).strict()
-export type ItemVersionDto = z.infer<typeof ItemVersionDto>;
+export type VersionDto = z.infer<typeof VersionDto>;

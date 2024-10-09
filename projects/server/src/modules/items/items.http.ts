@@ -1,6 +1,13 @@
 import {NextFunction, Request, Response} from "express";
 
-import {ItemDto, ItemsURLParams, ItemVersionDto, ItemVersionsURLParams} from "@localful/common";
+import {
+  ItemDto,
+  ItemsURLParams,
+  VersionDto,
+  VersionsURLParams,
+  ItemsQueryParams,
+  VersionsQueryParams
+} from "@localful/common";
 
 import {validateSchema} from "@common/schema-validator.js";
 import {HttpStatusCodes} from "@common/http-status-codes.js";
@@ -41,7 +48,22 @@ export class ItemsHttpController {
   }
 
   async getItems(req: Request, res: Response, next: NextFunction) {
-    return res.sendStatus(HttpStatusCodes.NOT_IMPLEMENTED)
+    try {
+      const requestUser = await this.accessControlService.validateAuthentication(req);
+      const query = await validateSchema(req.query, ItemsQueryParams);
+
+      if ("ids" in query) {
+        const items = await this.itemsService.getItemsById(requestUser, query.ids);
+        return res.status(HttpStatusCodes.OK).json(items)
+      }
+      else {
+        const result = await this.itemsService.getItemsByFilters(requestUser, query)
+        return res.status(HttpStatusCodes.OK).json(result)
+      }
+    }
+    catch (error) {
+      next(error)
+    }
   }
 
   async deleteItem(req: Request, res: Response, next: NextFunction) {
@@ -60,7 +82,7 @@ export class ItemsHttpController {
   async createVersion(req: Request, res: Response, next: NextFunction) {
     try {
       const requestUser = await this.accessControlService.validateAuthentication(req);
-      const versionDto = await validateSchema(req.body, ItemVersionDto);
+      const versionDto = await validateSchema(req.body, VersionDto);
 
       const createdVersionDto = await this.itemsService.createVersion(requestUser, versionDto);
       return res.status(HttpStatusCodes.CREATED).json(createdVersionDto);
@@ -73,7 +95,7 @@ export class ItemsHttpController {
   async getVersion(req: Request, res: Response, next: NextFunction) {
     try {
       const requestUser = await this.accessControlService.validateAuthentication(req);
-      const params = await validateSchema(req.params, ItemVersionsURLParams);
+      const params = await validateSchema(req.params, VersionsURLParams);
 
       const user = await this.itemsService.getVersion(requestUser, params.versionId);
       return res.status(HttpStatusCodes.OK).json(user)
@@ -85,7 +107,7 @@ export class ItemsHttpController {
 
   async deleteVersion(req: Request, res: Response, next: NextFunction) {
     try {
-      const params = await validateSchema(req.params, ItemVersionsURLParams);
+      const params = await validateSchema(req.params, VersionsURLParams);
       const requestUser = await this.accessControlService.validateAuthentication(req);
 
       await this.itemsService.deleteVersion(requestUser, params.versionId);
@@ -97,6 +119,21 @@ export class ItemsHttpController {
   }
 
   async getVersions(req: Request, res: Response, next: NextFunction) {
-    return res.sendStatus(HttpStatusCodes.NOT_IMPLEMENTED)
+    try {
+      const requestUser = await this.accessControlService.validateAuthentication(req);
+      const query = await validateSchema(req.query, VersionsQueryParams);
+
+      if ("ids" in query) {
+        const items = await this.itemsService.getVersionsById(requestUser, query.ids);
+        return res.status(HttpStatusCodes.OK).json(items)
+      }
+      else {
+        const result = await this.itemsService.getVersionsByFilters(requestUser, query)
+        return res.status(HttpStatusCodes.OK).json(result)
+      }
+    }
+    catch (error) {
+      next(error)
+    }
   }
 }

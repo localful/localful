@@ -1,4 +1,4 @@
-import {ItemDto, ItemVersionDto} from "@localful/common";
+import {ItemDto, ItemsQueryByFiltersParams, VersionDto, VersionsQueryByFiltersParams} from "@localful/common";
 import {UserContext} from "@common/request-context.js";
 import {AccessControlService} from "@modules/auth/access-control.service.js";
 import {EventsService} from "@services/events/events.service.js";
@@ -6,6 +6,7 @@ import {EventIdentifiers} from "@services/events/events.js";
 import {VaultsService} from "@modules/vaults/vaults.service.js";
 import {ItemsDatabaseService} from "@modules/items/database/items.database.service.js";
 import {ItemDtoWithOwner, ItemVersionDtoWithOwner} from "@modules/items/database/database-item.js";
+import {ResourceListingResult} from "@localful/common";
 
 
 export class ItemsService {
@@ -69,8 +70,8 @@ export class ItemsService {
         const item = await this._getItemWithOwner(userContext, itemId)
 
         await this.accessControlService.validateAccessControlRules({
-            userScopedPermissions: ["users:delete"],
-            unscopedPermissions: ["users:delete:all"],
+            userScopedPermissions: ["item-version:delete"],
+            unscopedPermissions: ["item-version:delete:all"],
             requestingUserContext: userContext,
             targetUserId: item.ownerId,
         })
@@ -86,7 +87,31 @@ export class ItemsService {
         })
     }
 
-    convertDatabaseItemVersionDto(itemVersionDtoWithOwner: ItemVersionDtoWithOwner): ItemVersionDto {
+    async getItemsById(userContext: UserContext, ids: string[]): Promise<ItemDto[]> {
+        const items: ItemDto[] = []
+        for (const id of ids) {
+            // todo: this will run access checks on every fetch, is this ok here?
+            const item = await this.getItem(userContext, id)
+            items.push(item)
+        }
+        return items
+    }
+
+    async getItemsByFilters(userContext: UserContext, filters: ItemsQueryByFiltersParams): Promise<ResourceListingResult<ItemDto>> {
+        const vault = await this.vaultsService.get(userContext, filters.vaultId)
+
+        // Fetching the vault has ensured the user has permissions to access the vault, but we must also check the item permissions.
+        await this.accessControlService.validateAccessControlRules({
+            userScopedPermissions: ["item:retrieve"],
+            unscopedPermissions: ["item:retrieve:all"],
+            requestingUserContext: userContext,
+            targetUserId: vault.ownerId,
+        })
+
+        return this.itemsDatabaseService.getItems(filters)
+    }
+
+    convertDatabaseItemVersionDto(itemVersionDtoWithOwner: ItemVersionDtoWithOwner): VersionDto {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { ownerId, ...itemVersionDto } = itemVersionDtoWithOwner;
         return itemVersionDto;
@@ -111,7 +136,7 @@ export class ItemsService {
         return versionDtoWithOwner
     }
 
-    async createVersion(userContext: UserContext, versionDto: ItemVersionDto) {
+    async createVersion(userContext: UserContext, versionDto: VersionDto) {
         const itemDto = await this._getItemWithOwner(userContext, versionDto.itemId)
 
         await this.accessControlService.validateAccessControlRules({
@@ -155,5 +180,25 @@ export class ItemsService {
                 versionId: versionId
             }
         })
+    }
+
+    async getVersionsById(userContext: UserContext, ids: string[]): Promise<VersionDto[]> {
+        const versions: VersionDto[] = []
+        for (const id of ids) {
+            const version = await this.getVersion(userContext, id)
+            versions.push(version)
+        }
+        return versions
+    }
+
+    async getVersionsByFilters(userContext: UserContext, filters: VersionsQueryByFiltersParams): Promise<ResourceListingResult<VersionDto>> {
+        return {
+            meta: {
+                limit: 10,
+                offset: 0,
+                total: 100,
+            },
+            results: []
+        }
     }
 }

@@ -1,4 +1,4 @@
-import {ItemDto, ItemVersionDto} from "@localful/common";
+import {ItemDto, VersionDto} from "@localful/common";
 
 // todo: make sure internal dtos between modules (users etc) is consistent.
 
@@ -32,6 +32,6 @@ export interface InternalDatabaseItemVersionWithOwner extends InternalDatabaseIt
 	owner_id: string
 }
 
-export interface ItemVersionDtoWithOwner extends ItemVersionDto {
+export interface ItemVersionDtoWithOwner extends VersionDto {
 	ownerId: string
 }

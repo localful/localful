@@ -2,7 +2,6 @@ import {NextFunction, Request, Response} from "express"
 
 import {LoginRequest, LogoutRequest, RefreshRequest, VerifyEmailDto} from "@localful/common";
 
-import {RequestWithContext} from "@common/request-context.js";
 import { validateSchema } from "@common/schema-validator.js";
 import {HttpStatusCodes} from "@common/http-status-codes.js";
 import {AuthService} from "@modules/auth/auth.service.js";
@@ -69,7 +68,7 @@ export class AuthHttpController {
    * @param res
    * @param next
    */
-  async requestEmailVerification(req: RequestWithContext, res: Response, next: NextFunction) {
+  async requestEmailVerification(req: Request, res: Response, next: NextFunction) {
     try {
       const requestUser = await this.accessControlService.validateAuthentication(req);
       await this.authService.requestEmailVerification(requestUser.id)
@@ -87,7 +86,7 @@ export class AuthHttpController {
    * @param res
    * @param next
    */
-  async verifyEmail(req: RequestWithContext, res: Response, next: NextFunction) {
+  async verifyEmail(req: Request, res: Response, next: NextFunction) {
     try {
       const requestUser = await this.accessControlService.validateAuthentication(req);
       const data = await validateSchema(req.body, VerifyEmailDto);
@@ -114,7 +113,7 @@ export class AuthHttpController {
     }
   }
 
-  async changeEmail(req: RequestWithContext, res: Response, next: NextFunction) {
+  async changeEmail(req: Request, res: Response, next: NextFunction) {
     try {
       await this.accessControlService.validateAuthentication(req);
 
@@ -129,7 +128,7 @@ export class AuthHttpController {
     }
   }
 
-  async requestPasswordChange(req: RequestWithContext, res: Response, next: NextFunction) {
+  async requestPasswordChange(req: Request, res: Response, next: NextFunction) {
     try {
       await this.accessControlService.validateAuthentication(req);
 
@@ -144,7 +143,7 @@ export class AuthHttpController {
     }
   }
 
-  async changePassword(req: RequestWithContext, res: Response, next: NextFunction) {
+  async changePassword(req: Request, res: Response, next: NextFunction) {
     try {
       await this.accessControlService.validateAuthentication(req);
 

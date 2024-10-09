@@ -29,7 +29,10 @@ export interface WebsocketWithConnectionData extends WebSocket {
 }
 
 export class SyncWebsocketController {
+    // todo: could controller be created via factory function for DI so these could be setup in constructor?
+    // @ts-expect-error -- hard to define via constructor when using DI, and unclean to guard every usage.
     wss: WebSocketServer
+    // @ts-expect-error -- hard to define via constructor when using DI, and unclean to guard every usage.
     #config: SyncWebsocketControllerConfig
     #sockets: SocketStore = {}
     #rooms: RoomStore = {}
@@ -90,6 +93,7 @@ export class SyncWebsocketController {
             await this.purgeSocket(initialConnection.connectionData.sessionId);
         }
 
+        // @ts-expect-error -- types of WebSocket and WebsocketWithConnectionData are incompatible, this is fine as .connectionData is custom and added here.
         this.wss.handleUpgrade(req, socket, head, async (ws: WebsocketWithConnectionData) => {
             // Assign the sessionId directly to websocket so it can be used to identify it later
             ws.connectionData = initialConnection.connectionData

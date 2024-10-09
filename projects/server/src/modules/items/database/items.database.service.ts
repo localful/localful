@@ -1,5 +1,11 @@
 import {DatabaseService} from "@services/database/database.service.js";
-import {ErrorIdentifiers, ItemDto, ItemVersionDto} from "@localful/common";
+import {
+	ErrorIdentifiers,
+	ItemDto,
+	ItemsQueryByFiltersParams,
+	ResourceListingResult,
+	VersionDto
+} from "@localful/common";
 import Postgres from "postgres";
 import {PG_FOREIGN_KEY_VIOLATION, PG_UNIQUE_VIOLATION} from "@services/database/database-error-codes.js";
 import {ResourceRelationshipError} from "@services/errors/resource/resource-relationship.error.js";
@@ -83,7 +89,7 @@ export class ItemsDatabaseService {
 		}
 	}
 
-	private static convertDatabaseItemVersionToDto(version: InternalDatabaseItemVersion): ItemVersionDto {
+	private static convertDatabaseItemVersionToDto(version: InternalDatabaseItemVersion): VersionDto {
 		return {
 			id: version.id,
 			itemId: version.item_id,
@@ -239,6 +245,54 @@ export class ItemsDatabaseService {
 		}
 	}
 
+	async getItems(filters: ItemsQueryByFiltersParams): Promise<ResourceListingResult<ItemDto>> {
+		const sql = await this.databaseService.getSQL();
+
+		const limit = filters.limit || 100
+		const offset = filters.offset || 0
+
+		let result: InternalDatabaseItem[] = [];
+		let totalCount: number = 0
+		try {
+			const query = sql`
+				where vault_id = ${filters.vaultId}
+				${filters.types
+					? sql`and item_type in ${filters.types}`
+					: sql``
+				}
+				order by created_at
+				offset ${offset} limit ${limit}
+			`;
+
+			result = await sql<InternalDatabaseItem[]>`
+				select * from items
+				${query}
+			`;
+
+			const countResult = await sql<{count: number}[]>`select count(*) from items ${query}`
+			if (countResult[0]?.count) {
+				totalCount = countResult[0].count
+			}
+			else {
+				throw new SystemError({message: "Failed to fetch query count"})
+			}
+		}
+		catch (e: any) {
+			throw ItemsDatabaseService.getDatabaseError(e);
+		}
+
+		const results = result.map(ItemsDatabaseService.convertDatabaseItemToDto)
+
+		return {
+			meta: {
+				limit,
+				offset,
+				total: totalCount,
+			},
+			results
+		}
+	}
+
 	async getVersion(versionId: string): Promise<ItemVersionDtoWithOwner> {
 		const sql = await this.databaseService.getSQL();
 
@@ -266,7 +320,7 @@ export class ItemsDatabaseService {
 		}
 	}
 
-	async createVersion(itemVersionDto: ItemVersionDto): Promise<ItemVersionDto> {
+	async createVersion(itemVersionDto: VersionDto): Promise<VersionDto> {
 		const sql = await this.databaseService.getSQL();
 
 		let result: InternalDatabaseItemVersion[] = [];

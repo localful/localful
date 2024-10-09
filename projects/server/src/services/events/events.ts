@@ -1,4 +1,4 @@
-import {ItemDto, ItemVersionDto, UserDto, VaultDto} from "@localful/common";
+import {ItemDto, VersionDto, UserDto, VaultDto} from "@localful/common";
 
 export const EventIdentifiers = {
     // Auth Events
@@ -101,7 +101,7 @@ export interface ItemVersionCreateEvent {
     type: typeof EventIdentifiers.ITEM_VERSION_CREATE,
     detail: {
         sessionId: string
-        version: ItemVersionDto
+        version: VersionDto
     }
 }
 export interface ItemVersionDeleteEvent {

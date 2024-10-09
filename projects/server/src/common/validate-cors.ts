@@ -7,7 +7,7 @@ type CorsCallback = (error: any, allow?: boolean) => void
 
 export function createCorsOptions(envService: EnvironmentService): CorsOptions {
     return {
-        origin: (origin: string, callback: CorsCallback) => {
+        origin: (origin: string | undefined, callback: CorsCallback) => {
             // Only enable CORS checks in production mode
             if (envService.vars.general.environment !== "production") {
                 return callback(null, true)
