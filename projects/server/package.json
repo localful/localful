@@ -14,7 +14,7 @@
     "test": "vitest run",
     "db:dump": "pg_dump localful > ./backup/localful.sql",
     "db:restore": "psql localful < ./backup/localful.sql",
-    "db:init:data": "ts-node testing/cli.ts",
+    "db:init:data": "tsx testing/cli.ts",
     "dev:common-rebuild": "(cd ../common && npm run build) && npm i"
   },
   "dependencies": {
@@ -29,6 +29,7 @@
     "ms": "^3.0.0-canary.1",
     "postgres": "^3.4.3",
     "pumpit": "^10.0.0",
+    "query-string": "^9.1.1",
     "rimraf": "^5.0.5",
     "uuid": "^9.0.1",
     "validator": "^13.11.0",

@@ -248,30 +248,26 @@ export class ItemsDatabaseService {
 	async getItems(filters: ItemsQueryByFiltersParams): Promise<ResourceListingResult<ItemDto>> {
 		const sql = await this.databaseService.getSQL();
 
-		const limit = filters.limit || 100
+		const limit = filters.limit || 2
 		const offset = filters.offset || 0
 
 		let result: InternalDatabaseItem[] = [];
 		let totalCount: number = 0
 		try {
-			const query = sql`
+			const where = sql`
 				where vault_id = ${filters.vaultId}
 				${filters.types
-					? sql`and item_type in ${filters.types}`
+					? sql`and item_type in ${sql(filters.types)}`
 					: sql``
 				}
-				order by created_at
-				offset ${offset} limit ${limit}
 			`;
+			const paging = sql`order by created_at offset ${offset} limit ${limit}`
 
-			result = await sql<InternalDatabaseItem[]>`
-				select * from items
-				${query}
-			`;
+			result = await sql<InternalDatabaseItem[]>`select * from items ${where} ${paging}`;
 
-			const countResult = await sql<{count: number}[]>`select count(*) from items ${query}`
+			const countResult = await sql<{count: number}[]>`select count(*) from items ${where}`
 			if (countResult[0]?.count) {
-				totalCount = countResult[0].count
+				totalCount = parseInt(String(countResult[0].count))
 			}
 			else {
 				throw new SystemError({message: "Failed to fetch query count"})
@@ -285,9 +281,10 @@ export class ItemsDatabaseService {
 
 		return {
 			meta: {
+				count: results.length,
+				total: totalCount,
 				limit,
 				offset,
-				total: totalCount,
 			},
 			results
 		}

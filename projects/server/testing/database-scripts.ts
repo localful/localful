@@ -1,9 +1,11 @@
 import {Sql} from "postgres";
 import {exampleUser1, testAdminUser1, testAdminUser2Unverified, testUser1, testUser2Unverified} from "./data/users.js";
 import {testAdminUser1Vault1, testUser1Vault1, testUser1Vault2} from "./data/vaults.js";
+import testItems from "./data/test-items.json"
 
 export interface ScriptOptions {
   logging: boolean
+  skipItemData?: boolean
 }
 
 /**
@@ -26,7 +28,7 @@ export async function clearTestData(sql: Sql<any>, options?: ScriptOptions) {
     console.log("Running database clear");
   }
 
-  // Deleting users will cascade delete their resources which will cascade delete the related changes too
+  // Deleting users will cascade delete all related data so we don't need to specifically delete everything.
   for (const user of [testUser1, testUser2Unverified, testAdminUser1, testAdminUser2Unverified]) {
     await sql`DELETE FROM users where id = ${user.id}`;
   }
@@ -61,6 +63,25 @@ export async function seedTestData(sql: Sql<any>, options?: ScriptOptions) {
       INSERT INTO vaults(id, vault_name, protected_encryption_key, protected_data, owner_id, created_at, updated_at, deleted_at)
       VALUES (${vault.id}, ${vault.name}, ${vault.protectedEncryptionKey}, ${vault.protectedData || null}, ${vault.ownerId}, ${vault.createdAt}, ${vault.updatedAt}, ${vault.deletedAt})
     `;
+  }
+
+  if (!options?.skipItemData) {
+    for (const userId of Object.keys(testItems)) {
+      // @ts-expect-error -- just allow userId to match testItems key.
+      for (const item of [...testItems[userId].active, ...testItems[userId].deleted]) {
+        await sql`
+        INSERT INTO items(id, item_type, created_at, deleted_at, vault_id)
+        VALUES (${item.id}, ${item.type}, ${item.createdAt}, ${item.deletedAt}, ${item.vaultId})
+      `;
+
+        for (const version of [...item.versions.active, ...item.versions.deleted]) {
+          await sql`
+          INSERT INTO item_versions(id, created_at, device_name, protected_data, item_id, deleted_at)
+          VALUES (${version.id}, ${version.createdAt}, ${version.deviceName}, ${version.protectedData}, ${version.itemId}, ${version.deletedAt})
+        `;
+        }
+      }
+    }
   }
 
   if (options?.logging) {

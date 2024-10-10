@@ -13,9 +13,10 @@ export type ResourceListingParams = z.infer<typeof ResourceListingParams>;
 
 export interface ResourceListingResult<T> {
 	meta: {
+		results: number
+		total: number
 		limit: number
 		offset: number
-		total: number
 	}
 	results: T[]
 }

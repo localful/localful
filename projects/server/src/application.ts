@@ -2,6 +2,7 @@ import http, {Server} from "node:http";
 import {PumpIt} from "pumpit";
 import cors from "cors";
 import express, {NextFunction, Request, Response} from "express";
+import queryString from "query-string"
 import {ErrorIdentifiers} from "@localful/common";
 
 import {EnvironmentService} from "@services/environment/environment.service.js";
@@ -112,6 +113,10 @@ export class Application {
         app.use(express.json());
         app.use(express.urlencoded({extended: true}));
         app.disable("x-powered-by")
+
+        app.set("query parser", (qs: string) => {
+            return queryString.parse(qs, {parseNumbers: true, arrayFormat: "bracket"})
+        })
 
         // Cors setup
         const envService = this.container.resolve<EnvironmentService>(EnvironmentService);

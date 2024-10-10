@@ -194,9 +194,10 @@ export class ItemsService {
     async getVersionsByFilters(userContext: UserContext, filters: VersionsQueryByFiltersParams): Promise<ResourceListingResult<VersionDto>> {
         return {
             meta: {
+                results: 0,
+                total: 100,
                 limit: 10,
                 offset: 0,
-                total: 100,
             },
             results: []
         }

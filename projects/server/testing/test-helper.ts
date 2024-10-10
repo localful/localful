@@ -3,7 +3,7 @@ import {Server} from "node:http";
 
 import {TokenPair} from "@localful/common";
 
-import {resetTestData} from "./database-scripts.js";
+import {resetTestData, ScriptOptions} from "./database-scripts.js";
 import {EnvironmentService} from "@services/environment/environment.service.js";
 import {UsersService} from "@modules/users/users.service.js";
 import {TokenService} from "@services/token/token.service.js";
@@ -75,10 +75,14 @@ export class TestHelper {
   /**
    * Reset the db to match the predefined test content.
    */
-  async resetDatabaseData() {
+  async resetDatabaseData(options?: ScriptOptions) {
     const databaseService = this.application.getDependency<DatabaseService>(DatabaseService);
     const sql = await databaseService.getSQL();
-    await resetTestData(sql);
+    await resetTestData(sql, {
+      logging: options?.logging || false,
+      // Default to skipping populating items which dramatically increases test performance due to amount of test items
+      skipItemData: typeof options?.skipItemData === "boolean" ? options.skipItemData : true
+    });
   }
 
   /**
@@ -93,8 +97,8 @@ export class TestHelper {
     await dataStoreService.onModuleDestroy();
   }
 
-  async beforeEach() {
-    await this.resetDatabaseData();
+  async beforeEach(options?: ScriptOptions) {
+    await this.resetDatabaseData(options);
 
     // Overwrite server settings to ensure tests are consistent
     // todo: this change will persist after tests. Should this be done via some sort of mocking or override to bypass the database.
