@@ -6,7 +6,6 @@ import {
   DatabaseCreateUserDto,
   DatabaseUpdateUserDto,
   DatabaseUserDto,
-  RawDatabaseUser
 } from "@modules/users/database/database-user.js";
 import {DatabaseService} from "@services/database/database.service.js";
 import {PG_UNIQUE_VIOLATION} from "@services/database/database-error-codes.js";
@@ -19,39 +18,6 @@ export class UsersDatabaseService {
   constructor(
     private readonly databaseService: DatabaseService
   ) {}
-
-  private static mapApplicationField(fieldName: keyof DatabaseUserDto): keyof RawDatabaseUser {
-    switch (fieldName) {
-      case "passwordHash":
-        return "password_hash";
-      case "createdAt":
-        return "created_at";
-      case "updatedAt":
-        return "updated_at";
-      case "displayName":
-        return "display_name"
-      case "verifiedAt":
-        return "verified_at"
-      case "firstVerifiedAt":
-        return "first_verified_at"
-      default:
-        return fieldName;
-    }
-  }
-
-  private static convertRawUserToDto(user: RawDatabaseUser): DatabaseUserDto {
-    return {
-      id: user.id,
-      email: user.email,
-      displayName: user.display_name,
-      passwordHash: user.password_hash,
-      verifiedAt: user.verified_at,
-      firstVerifiedAt: user.first_verified_at,
-      role: user.role,
-      createdAt: user.created_at,
-      updatedAt: user.updated_at,
-    }
-  }
 
   private static getDatabaseError(e: any) {
     if (e instanceof postgres.PostgresError) {
@@ -74,16 +40,16 @@ export class UsersDatabaseService {
   async get(userId: string): Promise<DatabaseUserDto> {
     const sql = await this.databaseService.getSQL();
 
-    let result: RawDatabaseUser[] = [];
+    let result: DatabaseUserDto[] = [];
     try {
-      result = await sql<RawDatabaseUser[]>`SELECT * FROM users WHERE id = ${userId}`;
+      result = await sql<DatabaseUserDto[]>`select * from users where id = ${userId}`;
     }
     catch (e: any) {
       throw UsersDatabaseService.getDatabaseError(e);
     }
 
-    if (result.length > 0) {
-      return UsersDatabaseService.convertRawUserToDto(result[0]);
+    if (result.length === 1) {
+      return result[0]
     }
     else {
       throw new ResourceNotFoundError({
@@ -96,16 +62,16 @@ export class UsersDatabaseService {
   async getByEmail(email: string): Promise<DatabaseUserDto> {
     const sql = await this.databaseService.getSQL();
 
-    let result: RawDatabaseUser[] = [];
+    let result: DatabaseUserDto[] = [];
     try {
-      result = await sql<RawDatabaseUser[]>`SELECT * FROM users WHERE email = ${email}`;
+      result = await sql<DatabaseUserDto[]>`select * from users where email = ${email}`;
     }
     catch (e: any) {
       throw UsersDatabaseService.getDatabaseError(e);
     }
 
-    if (result.length > 0) {
-      return UsersDatabaseService.convertRawUserToDto(result[0]);
+    if (result.length === 1) {
+      return result[0]
     }
     else {
       throw new ResourceNotFoundError({
@@ -118,20 +84,16 @@ export class UsersDatabaseService {
   async create(user: DatabaseCreateUserDto): Promise<DatabaseUserDto> {
     const sql = await this.databaseService.getSQL();
 
-    let result: RawDatabaseUser[] = [];
+    let result: DatabaseUserDto[] = [];
     try {
-      result = await sql<RawDatabaseUser[]>`
-        INSERT INTO users(id, email, display_name, password_hash, verified_at, first_verified_at, role, created_at, updated_at) 
-        VALUES (DEFAULT, ${user.email}, ${user.displayName}, ${user.passwordHash}, DEFAULT, DEFAULT, ${user.role}, DEFAULT, DEFAULT)
-        RETURNING *;
-       `;
+      result = await sql<DatabaseUserDto[]>`insert into users ${sql([user])} returning *;`;
     }
     catch (e: any) {
       throw UsersDatabaseService.getDatabaseError(e);
     }
 
-    if (result.length > 0) {
-      return UsersDatabaseService.convertRawUserToDto(result[0]);
+    if (result.length === 1) {
+      return result[0]
     }
     else {
       throw new SystemError({
@@ -148,28 +110,16 @@ export class UsersDatabaseService {
       return this.get(userId);
     }
 
-    // Process all fields
-    // todo: this offers no protection against updating fields like id which should never be updated
-    const updateObject: any = {};
-    for (const fieldName of Object.keys(databaseUpdateUserDto) as Array<keyof DatabaseUpdateUserDto>) {
-      updateObject[UsersDatabaseService.mapApplicationField(fieldName)] = databaseUpdateUserDto[fieldName];
-    }
-
-    let result: RawDatabaseUser[] = [];
+    let result: DatabaseUserDto[] = [];
     try {
-      result = await sql<RawDatabaseUser[]>`
-        UPDATE users
-        SET ${sql(updateObject, ...Object.keys(updateObject))}
-        WHERE id = ${userId}
-        RETURNING *;
-      `;
+      result = await sql<DatabaseUserDto[]>`update users set ${sql(databaseUpdateUserDto)} where id = ${userId} returning *;`;
     }
     catch (e: any) {
       throw UsersDatabaseService.getDatabaseError(e);
     }
 
-    if (result.length > 0) {
-      return UsersDatabaseService.convertRawUserToDto(result[0]);
+    if (result.length === 1) {
+      return result[0]
     }
     else {
       throw new SystemError({
@@ -183,7 +133,7 @@ export class UsersDatabaseService {
 
     let result: RowList<Row[]>;
     try {
-      result = await sql`DELETE FROM users WHERE id = ${userId}`;
+      result = await sql`delete from users where id = ${userId}`;
     }
     catch (e: any) {
       throw UsersDatabaseService.getDatabaseError(e);
@@ -191,7 +141,7 @@ export class UsersDatabaseService {
 
     // If there's a count then rows were affected and the deletion was a success
     // If there's no count but an error wasn't thrown then the entity must not exist
-    if (result && result.count) {
+    if (result?.count) {
       return;
     }
     else {

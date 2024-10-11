@@ -20,6 +20,7 @@ export class DatabaseService {
         // timezone conversion upto API clients.
         timezone: "UTC",
       },
+      transform: postgres.camel
     });
     return this.sql;
   }

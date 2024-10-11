@@ -12,10 +12,8 @@ import {ResourceRelationshipError} from "@services/errors/resource/resource-rela
 import {SystemError} from "@services/errors/base/system.error.js";
 import {ResourceNotFoundError} from "@services/errors/resource/resource-not-found.error.js";
 import {
-	InternalDatabaseItem, InternalDatabaseItemVersion,
-	InternalDatabaseItemVersionWithOwner, InternalDatabaseItemWithOwner,
 	ItemDtoWithOwner,
-	ItemVersionDtoWithOwner,
+	VersionDtoWithOwner,
 } from "@modules/items/database/database-item.js";
 
 
@@ -23,82 +21,6 @@ export class ItemsDatabaseService {
 	constructor(
 		private readonly databaseService: DatabaseService
 	) {}
-
-	private static mapItemApplicationField(fieldName: string): string {
-		switch (fieldName) {
-			case "vaultId":
-				return "vault_id"
-			case "itemType":
-				return "item_type"
-			case "createdAt":
-				return "created_at";
-			case "deletedAt":
-				return "deleted_at";
-			default:
-				return fieldName;
-		}
-	}
-
-	private static mapItemVersionApplicationField(fieldName: string): string {
-		switch (fieldName) {
-			case "itemId":
-				return "item_id"
-			case "deviceName":
-				return "device_name"
-			case "protectedData":
-				return "protected_data";
-			case "createdAt":
-				return "created_at";
-			case "deletedAt":
-				return "deleted_at";
-			default:
-				return fieldName;
-		}
-	}
-
-	private static convertDatabaseItemWithOwnerToDto(item: InternalDatabaseItemWithOwner): ItemDtoWithOwner {
-		return {
-			id: item.id,
-			vaultId: item.vault_id,
-			type: item.item_type,
-			createdAt: item.created_at,
-			deletedAt: item.deleted_at,
-			ownerId: item.owner_id,
-		}
-	}
-
-	private static convertDatabaseItemToDto(item: InternalDatabaseItem): ItemDto {
-		return {
-			id: item.id,
-			vaultId: item.vault_id,
-			type: item.item_type,
-			createdAt: item.created_at,
-			deletedAt: item.deleted_at,
-		}
-	}
-
-	private static convertDatabaseItemVersionWithOwnerToDto(version: InternalDatabaseItemVersionWithOwner): ItemVersionDtoWithOwner {
-		return {
-			id: version.id,
-			itemId: version.item_id,
-			deviceName: version.device_name,
-			protectedData: version.protected_data,
-			createdAt: version.created_at,
-			deletedAt: version.deleted_at,
-			ownerId: version.owner_id
-		}
-	}
-
-	private static convertDatabaseItemVersionToDto(version: InternalDatabaseItemVersion): VersionDto {
-		return {
-			id: version.id,
-			itemId: version.item_id,
-			deviceName: version.device_name,
-			protectedData: version.protected_data,
-			createdAt: version.created_at,
-			deletedAt: version.deleted_at,
-		}
-	}
 
 	private static getDatabaseError(e: any) {
 		if (e instanceof Postgres.PostgresError && e.code) {
@@ -141,9 +63,9 @@ export class ItemsDatabaseService {
 	async getItem(itemId: string): Promise<ItemDtoWithOwner> {
 		const sql = await this.databaseService.getSQL();
 
-		let result: InternalDatabaseItemWithOwner[] = [];
+		let result: ItemDtoWithOwner[] = [];
 		try {
-			result = await sql<InternalDatabaseItemWithOwner[]>`
+			result = await sql<ItemDtoWithOwner[]>`
 				select items.*, vaults.owner_id from items
 				join vaults on items.vault_id = vaults.id
 				where items.id = ${itemId}
@@ -153,8 +75,8 @@ export class ItemsDatabaseService {
 			throw ItemsDatabaseService.getDatabaseError(e);
 		}
 
-		if (result.length > 0) {
-			return ItemsDatabaseService.convertDatabaseItemWithOwnerToDto(result[0]);
+		if (result.length === 1) {
+			return result[0]
 		}
 		else {
 			throw new ResourceNotFoundError({
@@ -167,20 +89,16 @@ export class ItemsDatabaseService {
 	async createItem(itemDto: ItemDto): Promise<ItemDto> {
 		const sql = await this.databaseService.getSQL();
 
-		let result: InternalDatabaseItem[] = [];
+		let result: ItemDtoWithOwner[] = [];
 		try {
-			result = await sql<InternalDatabaseItem[]>`
-          INSERT INTO items(id, item_type, created_at, deleted_at, vault_id)
-          VALUES (${itemDto.id}, ${itemDto.type}, ${itemDto.createdAt}, ${itemDto.deletedAt}, ${itemDto.vaultId})
-          RETURNING *;
-			`;
+			result = await sql<ItemDtoWithOwner[]>`insert into items ${sql([itemDto])} returning *;`;
 		}
 		catch (e: any) {
 			throw ItemsDatabaseService.getDatabaseError(e);
 		}
 
-		if (result.length > 0) {
-			return ItemsDatabaseService.convertDatabaseItemToDto(result[0]);
+		if (result.length === 1) {
+			return result[0]
 		}
 		else {
 			throw new SystemError({
@@ -195,14 +113,14 @@ export class ItemsDatabaseService {
 		let deleteResult: Postgres.RowList<Postgres.Row[]>;
 		try {
 			deleteResult = await sql`
-          UPDATE vaults
-          SET deleted_at = now()
-          WHERE id = ${itemId}
-          RETURNING *;
+          update vaults
+          set deleted_at = now()
+          where id = ${itemId}
+          returning *;
 			`;
 
 			// Delete all versions as they aren't needed anymore.
-			await sql`DELETE FROM item_versions WHERE item_id = ${itemId}`;
+			await sql`delete from item_versions where item_id = ${itemId}`;
 		}
 		catch (e: any) {
 			throw ItemsDatabaseService.getDatabaseError(e);
@@ -251,7 +169,7 @@ export class ItemsDatabaseService {
 		const limit = filters.limit || 2
 		const offset = filters.offset || 0
 
-		let result: InternalDatabaseItem[] = [];
+		let results: ItemDtoWithOwner[] = [];
 		let totalCount: number = 0
 		try {
 			const where = sql`
@@ -263,7 +181,7 @@ export class ItemsDatabaseService {
 			`;
 			const paging = sql`order by created_at offset ${offset} limit ${limit}`
 
-			result = await sql<InternalDatabaseItem[]>`select * from items ${where} ${paging}`;
+			results = await sql<ItemDtoWithOwner[]>`select * from items ${where} ${paging}`;
 
 			const countResult = await sql<{count: number}[]>`select count(*) from items ${where}`
 			if (countResult[0]?.count) {
@@ -277,11 +195,9 @@ export class ItemsDatabaseService {
 			throw ItemsDatabaseService.getDatabaseError(e);
 		}
 
-		const results = result.map(ItemsDatabaseService.convertDatabaseItemToDto)
-
 		return {
 			meta: {
-				count: results.length,
+				results: results.length,
 				total: totalCount,
 				limit,
 				offset,
@@ -290,12 +206,12 @@ export class ItemsDatabaseService {
 		}
 	}
 
-	async getVersion(versionId: string): Promise<ItemVersionDtoWithOwner> {
+	async getVersion(versionId: string): Promise<VersionDtoWithOwner> {
 		const sql = await this.databaseService.getSQL();
 
-		let result: InternalDatabaseItemVersionWithOwner[] = [];
+		let result: VersionDtoWithOwner[] = [];
 		try {
-			result = await sql<InternalDatabaseItemVersionWithOwner[]>`
+			result = await sql<VersionDtoWithOwner[]>`
 				select item_versions.*, vaults.owner_id from item_versions
 				join items on item_versions.item_id = item_versions.item_id
 				join vaults on items.vault_id = vaults.id
@@ -306,8 +222,8 @@ export class ItemsDatabaseService {
 			throw ItemsDatabaseService.getDatabaseError(e);
 		}
 
-		if (result.length > 0) {
-			return ItemsDatabaseService.convertDatabaseItemVersionWithOwnerToDto(result[0]);
+		if (result.length === 1) {
+			return result[0]
 		}
 		else {
 			throw new ResourceNotFoundError({
@@ -320,20 +236,16 @@ export class ItemsDatabaseService {
 	async createVersion(itemVersionDto: VersionDto): Promise<VersionDto> {
 		const sql = await this.databaseService.getSQL();
 
-		let result: InternalDatabaseItemVersion[] = [];
+		let result: VersionDtoWithOwner[] = [];
 		try {
-			result = await sql<InternalDatabaseItemVersion[]>`
-          INSERT INTO item_versions(id, created_at, device_name, protected_data, item_id)
-          VALUES (${itemVersionDto.id}, ${itemVersionDto.createdAt}, ${itemVersionDto.deviceName}, ${itemVersionDto.protectedData}, ${itemVersionDto.itemId})
-          RETURNING *;
-			`;
+			result = await sql<VersionDtoWithOwner[]>`insert into item_versions ${sql([itemVersionDto])} returning *;`;
 		}
 		catch (e: any) {
 			throw ItemsDatabaseService.getDatabaseError(e);
 		}
 
-		if (result.length > 0) {
-			return ItemsDatabaseService.convertDatabaseItemVersionToDto(result[0]);
+		if (result.length === 1) {
+			return result[0]
 		}
 		else {
 			throw new SystemError({
@@ -348,10 +260,10 @@ export class ItemsDatabaseService {
 		let deleteResult: Postgres.RowList<Postgres.Row[]>;
 		try {
 			deleteResult = await sql`
-          UPDATE item_versions
-          SET (deleted_at, protected_data) = (now(), NULL)
-          WHERE id = ${versionId}
-          RETURNING *;
+          update item_versions
+          set (deleted_at, protected_data) = (now(), null)
+          where id = ${versionId}
+          returning *;
 			`;
 		}
 		catch (e: any) {
@@ -376,7 +288,7 @@ export class ItemsDatabaseService {
 
 		let result: Postgres.RowList<Postgres.Row[]>;
 		try {
-			result = await sql`DELETE FROM item_versions WHERE id = ${versionId}`;
+			result = await sql`delete from item_versions where id = ${versionId}`;
 		}
 		catch (e: any) {
 			throw ItemsDatabaseService.getDatabaseError(e);
@@ -384,7 +296,7 @@ export class ItemsDatabaseService {
 
 		// If there's a count then rows were affected and the deletion was a success
 		// If there's no count but an error wasn't thrown then the entity must not exist
-		if (result && result.count) {
+		if (result?.count) {
 			return;
 		}
 		else {

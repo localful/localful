@@ -66,14 +66,14 @@ CREATE TRIGGER update_user_timestamps BEFORE UPDATE ON users FOR EACH ROW EXECUT
 */
 CREATE TABLE IF NOT EXISTS vaults (
     id UUID NOT NULL,
-    vault_name VARCHAR(100) NOT NULL,
+    name VARCHAR(100) NOT NULL,
     protected_encryption_key VARCHAR(255) NOT NULL,
     protected_data TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     deleted_at TIMESTAMPTZ,
     owner_id UUID NOT NULL,
-    CONSTRAINT vault_name_unique UNIQUE (owner_id, vault_name),
+    CONSTRAINT vault_name_unique UNIQUE (owner_id, name),
     CONSTRAINT vaults_pk PRIMARY KEY (id),
     CONSTRAINT vault_owner FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE
 );
@@ -86,7 +86,7 @@ CREATE TRIGGER update_vault_timestamps BEFORE UPDATE ON users FOR EACH ROW EXECU
 */
 CREATE TABLE IF NOT EXISTS items (
     id UUID NOT NULL,
-    item_type VARCHAR(20) NOT NULL,
+    type VARCHAR(20) NOT NULL,
     created_at TIMESTAMPTZ NOT NULL,
     deleted_at TIMESTAMPTZ,
     vault_id UUID NOT NULL,
@@ -102,8 +102,8 @@ CREATE TABLE IF NOT EXISTS items (
 CREATE TABLE IF NOT EXISTS item_versions (
     id UUID NOT NULL,
     item_id UUID NOT NULL,
-    device_name VARCHAR(50) NOT NULL,
     protected_data TEXT,
+    created_on VARCHAR(50) NOT NULL,
     created_at TIMESTAMPTZ NOT NULL,
     deleted_at TIMESTAMPTZ,
     CONSTRAINT item_versions_pk PRIMARY KEY (id),

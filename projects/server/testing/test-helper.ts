@@ -14,9 +14,9 @@ import {ServerManagementDatabaseService} from "@modules/server/database/server.d
 
 
 export class TestHelper {
-  private application: Application;
-  public server: Server;
-  public client: SuperAgentTest;
+  private application!: Application;
+  public server!: Server;
+  public client!: SuperAgentTest;
 
   async beforeAll() {
     // Create app

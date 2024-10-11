@@ -5,7 +5,7 @@ import {EventsService} from "@services/events/events.service.js";
 import {EventIdentifiers} from "@services/events/events.js";
 import {VaultsService} from "@modules/vaults/vaults.service.js";
 import {ItemsDatabaseService} from "@modules/items/database/items.database.service.js";
-import {ItemDtoWithOwner, ItemVersionDtoWithOwner} from "@modules/items/database/database-item.js";
+import {ItemDtoWithOwner, VersionDtoWithOwner} from "@modules/items/database/database-item.js";
 import {ResourceListingResult} from "@localful/common";
 
 
@@ -111,7 +111,7 @@ export class ItemsService {
         return this.itemsDatabaseService.getItems(filters)
     }
 
-    convertDatabaseItemVersionDto(itemVersionDtoWithOwner: ItemVersionDtoWithOwner): VersionDto {
+    convertDatabaseItemVersionDto(itemVersionDtoWithOwner: VersionDtoWithOwner): VersionDto {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { ownerId, ...itemVersionDto } = itemVersionDtoWithOwner;
         return itemVersionDto;

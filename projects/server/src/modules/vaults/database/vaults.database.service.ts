@@ -1,5 +1,4 @@
 import {DatabaseService} from "@services/database/database.service.js";
-import {RawDatabaseVault} from "@modules/vaults/database/database-vault.js";
 import {CreateVaultDto, ErrorIdentifiers, UpdateVaultDto, VaultDto} from "@localful/common";
 import Postgres from "postgres";
 import {PG_FOREIGN_KEY_VIOLATION, PG_UNIQUE_VIOLATION} from "@services/database/database-error-codes.js";
@@ -12,40 +11,6 @@ export class VaultsDatabaseService {
   constructor(
     private readonly databaseService: DatabaseService
   ) {}
-
-  private static mapApplicationField(fieldName: string): string {
-    switch (fieldName) {
-      case "name":
-        return "vault_name"
-      case "protectedEncryptionKey":
-        return "protected_encryption_key";
-      case "protectedData":
-        return "protected_data";
-      case "ownerId":
-        return "owner_id";
-      case "createdAt":
-        return "created_at";
-      case "updatedAt":
-        return "updated_at";
-      case "deletedAt":
-        return "deleted_at";
-      default:
-        return fieldName;
-    }
-  }
-
-  private static convertDatabaseDtoToDto(vault: RawDatabaseVault): VaultDto {
-    return {
-      id: vault.id,
-      name: vault.vault_name,
-      protectedEncryptionKey: vault.protected_encryption_key,
-      protectedData: vault.protected_data,
-      ownerId: vault.owner_id,
-      createdAt: vault.created_at,
-      updatedAt: vault.updated_at,
-      deletedAt: vault.deleted_at
-    }
-  }
 
   private static getDatabaseError(e: any) {
     if (e instanceof Postgres.PostgresError && e.code) {
@@ -82,16 +47,16 @@ export class VaultsDatabaseService {
   async get(vaultId: string): Promise<VaultDto> {
     const sql = await this.databaseService.getSQL();
 
-    let result: RawDatabaseVault[] = [];
+    let result: VaultDto[] = [];
     try {
-      result = await sql<RawDatabaseVault[]>`SELECT * FROM vaults WHERE id = ${vaultId}`;
+      result = await sql<VaultDto[]>`select * from vaults where id = ${vaultId}`;
     }
     catch (e: any) {
       throw VaultsDatabaseService.getDatabaseError(e);
     }
 
-    if (result.length > 0) {
-      return VaultsDatabaseService.convertDatabaseDtoToDto(result[0]);
+    if (result.length === 1) {
+      return result[0]
     }
     else {
       throw new ResourceNotFoundError({
@@ -104,20 +69,16 @@ export class VaultsDatabaseService {
   async create(createVaultDto: CreateVaultDto): Promise<VaultDto> {
     const sql = await this.databaseService.getSQL();
 
-    let result: RawDatabaseVault[] = [];
+    let result: VaultDto[] = [];
     try {
-      result = await sql<RawDatabaseVault[]>`
-        INSERT INTO vaults(id, vault_name, protected_encryption_key, protected_data, owner_id, created_at, updated_at, deleted_at) 
-        VALUES (${createVaultDto.id}, ${createVaultDto.name}, ${createVaultDto.protectedEncryptionKey}, ${createVaultDto.protectedData || null}, ${createVaultDto.ownerId}, ${createVaultDto.createdAt}, ${createVaultDto.updatedAt}, DEFAULT)
-        RETURNING *;
-       `;
+      result = await sql<VaultDto[]>`insert into vaults ${sql([createVaultDto])} returning *;`;
     }
     catch (e: any) {
       throw VaultsDatabaseService.getDatabaseError(e);
     }
 
-    if (result.length > 0) {
-      return VaultsDatabaseService.convertDatabaseDtoToDto(result[0]);
+    if (result.length === 1) {
+      return result[0]
     }
     else {
       throw new SystemError({
@@ -134,28 +95,16 @@ export class VaultsDatabaseService {
       return this.get(id);
     }
 
-    // Process all fields
-    // todo: this offers no protection against updating fields like id which should never be updated
-    const updateObject: any = {};
-    for (const fieldName of Object.keys(updateVaultDto) as Array<keyof UpdateVaultDto>) {
-      updateObject[VaultsDatabaseService.mapApplicationField(fieldName)] = updateVaultDto[fieldName];
-    }
-
-    let result: RawDatabaseVault[] = [];
+    let result: VaultDto[] = [];
     try {
-      result = await sql<RawDatabaseVault[]>`
-        UPDATE vaults
-        SET ${sql(updateObject, ...Object.keys(updateObject))}
-        WHERE id = ${id}
-        RETURNING *;
-      `;
+      result = await sql<VaultDto[]>`update vaults set ${sql(updateVaultDto)} where id = ${id} returning *;`;
     }
     catch (e: any) {
       throw VaultsDatabaseService.getDatabaseError(e);
     }
 
-    if (result.length > 0) {
-      return VaultsDatabaseService.convertDatabaseDtoToDto(result[0]);
+    if (result.length === 1) {
+      return result[0]
     }
     else {
       throw new SystemError({
@@ -169,7 +118,7 @@ export class VaultsDatabaseService {
 
     let result: Postgres.RowList<Postgres.Row[]>;
     try {
-      result = await sql`DELETE FROM vaults WHERE id = ${id}`;
+      result = await sql`delete from vaults where id = ${id}`;
     }
     catch (e: any) {
       throw VaultsDatabaseService.getDatabaseError(e);
@@ -177,7 +126,7 @@ export class VaultsDatabaseService {
 
     // If there's a count then rows were affected and the deletion was a success
     // If there's no count but an error wasn't thrown then the entity must not exist
-    if (result && result.count) {
+    if (result?.count) {
       return;
     }
     else {

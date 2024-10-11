@@ -27,7 +27,7 @@ describe("Login Auth",() => {
         .post("/v1/auth/login")
         .send({
           email: testUser1.email,
-          password: testUser1.serverPassword
+          password: testUser1.password
         });
 
       expect(statusCode).toEqual(200);
@@ -52,7 +52,7 @@ describe("Login Auth",() => {
       // todo: should this be a separate test?
       expect(body).not.toEqual(expect.objectContaining({
         passwordHash: testUser1.passwordHash,
-        password: testUser1.serverPassword
+        password: testUser1.password
       }))
     })
   })
@@ -85,7 +85,7 @@ describe("Login Auth",() => {
         .post("/v1/auth/login")
         .send({
           email: "randomuser@example.com",
-          password: testUser1.serverPassword
+          password: testUser1.password
         });
 
       expectForbidden(body, statusCode, ErrorIdentifiers.AUTH_CREDENTIALS_INVALID)
@@ -99,7 +99,7 @@ describe("Login Auth",() => {
         endpoint: "/v1/auth/login",
         data: {
           email: testUser1.email,
-          password: testUser1.serverPassword
+          password: testUser1.password
         },
         testFieldKey: "email"
       })
@@ -111,7 +111,7 @@ describe("Login Auth",() => {
         endpoint: "/v1/auth/login",
         data: {
           email: testUser1.email,
-          password: testUser1.serverPassword
+          password: testUser1.password
         },
         testFieldKey: "password"
       })

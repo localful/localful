@@ -28,17 +28,3 @@ export const DatabaseUpdateUserDto = UpdateUserDto
 	.strict()
 	.partial()
 export type DatabaseUpdateUserDto = z.infer<typeof DatabaseUpdateUserDto>
-
-export interface RawDatabaseUser {
-	id: string
-	email: string
-	display_name: string
-	password_hash: string
-	protected_encryption_key: string
-	protected_additional_data: string
-	verified_at: string | null
-	first_verified_at: string | null
-	role: Roles
-	created_at: string
-	updated_at: string
-}
