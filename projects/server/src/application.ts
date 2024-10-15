@@ -2,7 +2,8 @@ import http, {Server} from "node:http";
 import {PumpIt} from "pumpit";
 import cors from "cors";
 import express, {NextFunction, Request, Response} from "express";
-import queryString from "query-string"
+import qs from "qs";
+
 import {ErrorIdentifiers} from "@localful/common";
 
 import {EnvironmentService} from "@services/environment/environment.service.js";
@@ -34,6 +35,7 @@ import {ServerManagementDatabaseService} from "@modules/server/database/server.d
 import {ItemsService} from "@modules/items/items.service.js";
 import {ItemsHttpController} from "@modules/items/items.http.js";
 import {ItemsDatabaseService} from "@modules/items/database/items.database.service.js";
+import {decodeQueryParameter} from "@common/query-param-decode.js";
 
 
 /**
@@ -114,8 +116,10 @@ export class Application {
         app.use(express.urlencoded({extended: true}));
         app.disable("x-powered-by")
 
-        app.set("query parser", (qs: string) => {
-            return queryString.parse(qs, {parseNumbers: true, arrayFormat: "bracket"})
+        app.set("query parser", (rawQueryString: string) => {
+            return qs.parse(rawQueryString, {
+                decoder: decodeQueryParameter
+            })
         })
 
         // Cors setup

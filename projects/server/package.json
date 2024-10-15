@@ -29,7 +29,7 @@
     "ms": "^3.0.0-canary.1",
     "postgres": "^3.4.3",
     "pumpit": "^10.0.0",
-    "query-string": "^9.1.1",
+    "qs": "^6.13.0",
     "rimraf": "^5.0.5",
     "uuid": "^9.0.1",
     "validator": "^13.11.0",
