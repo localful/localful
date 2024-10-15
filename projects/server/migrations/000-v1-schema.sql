@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS vaults (
     CONSTRAINT vaults_pk PRIMARY KEY (id),
     CONSTRAINT vault_owner FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE
 );
-CREATE TRIGGER update_vault_timestamps BEFORE UPDATE ON users FOR EACH ROW EXECUTE PROCEDURE update_table_timestamps();
+CREATE TRIGGER update_vault_timestamps BEFORE UPDATE ON vaults FOR EACH ROW EXECUTE PROCEDURE update_table_timestamps();
 
 /**
     Items Table
@@ -103,7 +103,7 @@ CREATE TABLE IF NOT EXISTS item_versions (
     id UUID NOT NULL,
     item_id UUID NOT NULL,
     protected_data TEXT,
-    created_on VARCHAR(50) NOT NULL,
+    device_name VARCHAR(50) NOT NULL,
     created_at TIMESTAMPTZ NOT NULL,
     deleted_at TIMESTAMPTZ,
     CONSTRAINT item_versions_pk PRIMARY KEY (id),

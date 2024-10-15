@@ -5,7 +5,7 @@ import testItems from "./data/test-items.json"
 
 export interface ScriptOptions {
   logging: boolean
-  skipItemData?: boolean
+  seedItems?: boolean
 }
 
 /**
@@ -61,11 +61,13 @@ export async function seedTestData(sql: Sql<any>, options?: ScriptOptions) {
     await sql`insert into vaults ${sql([vault])}`;
   }
 
-  if (!options?.skipItemData) {
+  if (options?.seedItems) {
     for (const userId of Object.keys(testItems)) {
       // @ts-expect-error -- just allow userId to match testItems key.
       for (const item of [...testItems[userId].active, ...testItems[userId].deleted]) {
-        await sql`insert into items ${sql([item])}`;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const {versions, ...dbItem} = item
+        await sql`insert into items ${sql([dbItem])}`;
 
         for (const version of [...item.versions.active, ...item.versions.deleted]) {
           await sql`insert into item_versions ${sql([version])}`;

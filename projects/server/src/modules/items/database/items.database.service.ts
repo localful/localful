@@ -206,6 +206,20 @@ export class ItemsDatabaseService {
 		}
 	}
 
+	async getAllItems(vaultId: string): Promise<ItemDto[]> {
+		const sql = await this.databaseService.getSQL();
+
+		let items: ItemDto[] = [];
+		try {
+			items = await sql<ItemDto[]>`select * from items where vault_id = ${vaultId} order by created_at desc`;
+		}
+		catch (e: any) {
+			throw ItemsDatabaseService.getDatabaseError(e);
+		}
+
+		return items
+	}
+
 	async getVersion(versionId: string): Promise<VersionDtoWithOwner> {
 		const sql = await this.databaseService.getSQL();
 
@@ -305,5 +319,19 @@ export class ItemsDatabaseService {
 				applicationMessage: "The requested version could not be found."
 			})
 		}
+	}
+
+	async getAllVersions(itemId: string): Promise<VersionDto[]> {
+		const sql = await this.databaseService.getSQL();
+
+		let versions: VersionDto[] = [];
+		try {
+			versions = await sql<VersionDto[]>`select * from item_versions where item_id = ${itemId} order by created_at desc`;
+		}
+		catch (e: any) {
+			throw ItemsDatabaseService.getDatabaseError(e);
+		}
+
+		return versions
 	}
 }

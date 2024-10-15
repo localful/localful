@@ -36,6 +36,8 @@ import {ItemsService} from "@modules/items/items.service.js";
 import {ItemsHttpController} from "@modules/items/items.http.js";
 import {ItemsDatabaseService} from "@modules/items/database/items.database.service.js";
 import {decodeQueryParameter} from "@common/query-param-decode.js";
+import {SnapshotHttpAdapter} from "@modules/snapshot/snapshot.http.js";
+import {SnapshotService} from "@modules/snapshot/snapshot.service.js";
 
 
 /**
@@ -93,6 +95,10 @@ export class Application {
         this.container.bindClass(VaultsDatabaseService, { value: VaultsDatabaseService, inject: [DatabaseService]}, {scope: "SINGLETON"})
         this.container.bindClass(VaultsService, { value: VaultsService, inject: [VaultsDatabaseService, AccessControlService, EventsService]}, {scope: "SINGLETON"})
         this.container.bindClass(VaultsHttpController, { value: VaultsHttpController, inject: [VaultsService, AccessControlService]}, {scope: "SINGLETON"})
+
+        // Snapshot module
+        this.container.bindClass(SnapshotService, { value: SnapshotService, inject: [VaultsService, ItemsService] }, {scope: "SINGLETON"});
+        this.container.bindClass(SnapshotHttpAdapter, { value: SnapshotHttpAdapter, inject: [SnapshotService, AccessControlService] }, {scope: "SINGLETON"});
 
         // Items module
         this.container.bindClass(ItemsDatabaseService, {value: ItemsDatabaseService, inject: [DatabaseService]}, {scope: "SINGLETON"})
@@ -171,6 +177,10 @@ export class Application {
         app.get("/v1/vaults/:vaultId", vaultsHttpController.getVault.bind(vaultsHttpController))
         app.patch("/v1/vaults/:vaultId", vaultsHttpController.updateVault.bind(vaultsHttpController))
         app.delete("/v1/vaults/:vaultId", vaultsHttpController.deleteVault.bind(vaultsHttpController));
+
+        // Snapshot module routes (uses /vault to keep related APIs grouped, but is managed in separate module)
+        const snapshotHttpAdapter = this.container.resolve<SnapshotHttpAdapter>(SnapshotHttpAdapter);
+        app.get("/v1/vaults/:vaultId/snapshot", snapshotHttpAdapter.getSnapshot.bind(snapshotHttpAdapter))
 
         // Items module routes
         const itemsHttpController = this.container.resolve<ItemsHttpController>(ItemsHttpController);

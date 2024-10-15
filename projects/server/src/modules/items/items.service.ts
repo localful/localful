@@ -111,6 +111,10 @@ export class ItemsService {
         return this.itemsDatabaseService.getItems(filters)
     }
 
+    async _getAllItems(vaultId: string): Promise<ItemDto[]> {
+        return this.itemsDatabaseService.getAllItems(vaultId)
+    }
+
     convertDatabaseItemVersionDto(itemVersionDtoWithOwner: VersionDtoWithOwner): VersionDto {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { ownerId, ...itemVersionDto } = itemVersionDtoWithOwner;
@@ -201,5 +205,9 @@ export class ItemsService {
             },
             results: []
         }
+    }
+
+    async _getAllVersions(itemId: string): Promise<VersionDto[]> {
+        return this.itemsDatabaseService.getAllVersions(itemId)
     }
 }
