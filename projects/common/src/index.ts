@@ -4,7 +4,7 @@ export * from "./schemas/common/listings"
 
 export * from "./errors/error-identifiers";
 
-export * from "./schemas/info";
+export * from "./schemas/server/info";
 
 export * from "./schemas/users/users";
 export * from "./schemas/users/users-params"
@@ -24,3 +24,5 @@ export * from "./schemas/items/items"
 export * from "./schemas/items/items-params"
 export * from "./schemas/items/versions"
 export * from "./schemas/items/versions-params"
+
+export * from "./schemas/snapshot/snapshot"

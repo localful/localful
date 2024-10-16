@@ -1,4 +1,6 @@
+import z from "zod"
 
+const isNumber = z.number()
 
 // todo: add unit tests and consider if direct user input to these functions (especially parseFloat) could cause issues
 export function decodeQueryParameter(value: string): any {
@@ -17,10 +19,14 @@ export function decodeQueryParameter(value: string): any {
 	}
 
 	// Attempt to parse numbers and return if valid.
-	const number = parseFloat(value)
-	if (!Number.isNaN(number)) {
-		return number
+	try {
+		const result = JSON.parse(value)
+		const isValidNumber = isNumber.safeParse(result)
+		if (isValidNumber) {
+			return result
+		}
 	}
+	catch (e) {}
 
 	return value
 }

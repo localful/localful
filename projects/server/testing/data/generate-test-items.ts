@@ -13,7 +13,7 @@ export interface TestItemDto extends ItemDto {
 
 interface GetTestVersionsOptions {
 	itemId: string
-	createdOn: string,
+	deviceName: string,
 	total: number
 	isDeleted?: boolean
 }
@@ -24,7 +24,7 @@ function getTestVersions(options: GetTestVersionsOptions): VersionDto[] {
 		versions.push({
 			itemId: options.itemId,
 			id: randomUUID(),
-			createdOn: options.createdOn,
+			deviceName: options.deviceName,
 			protectedData: `data${index}`,
 			createdAt: new Date().toISOString(),
 			deletedAt: options.isDeleted ? new Date().toISOString() : null,
@@ -55,11 +55,11 @@ function getTestItems(options: GetTestItemsOptions): TestItemDto[] {
 				deleted: [],
 			} : {
 				active: [
-					...getTestVersions({itemId, total: 10, createdOn: "device1"}),
-					...getTestVersions({itemId, total: 10, createdOn: "device2"}),
+					...getTestVersions({itemId, total: 10, deviceName: "device1"}),
+					...getTestVersions({itemId, total: 10, deviceName: "device2"}),
 				],
 				deleted: [
-					...getTestVersions({itemId, total: 5, createdOn: "device3", isDeleted: true}),
+					...getTestVersions({itemId, total: 5, deviceName: "device3", isDeleted: true}),
 				]
 			},
 		})

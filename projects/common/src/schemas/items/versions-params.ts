@@ -14,9 +14,9 @@ export const VersionsQueryByIdsParams = z.object({
 export type VersionsQueryByIdsParams = z.infer<typeof VersionsQueryByIdsParams>;
 
 export const VersionsQueryByFiltersParams = ResourceListingParams.extend({
-  vaultId: createIdField("vaultId"),
-  createdOn: z.array(VersionDto.shape.createdOn).optional(),
-  itemId: z.array(VersionDto.shape.itemId).optional(),
+  itemId: z.array(VersionDto.shape.itemId).min(1, 'You must specify at least one itemId'),
+  deviceName: z.array(VersionDto.shape.deviceName).optional(),
+  notDeviceName: z.array(VersionDto.shape.deviceName).optional(),
 }).strict()
 export type VersionsQueryByFiltersParams = z.infer<typeof VersionsQueryByFiltersParams>;
 

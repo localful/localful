@@ -6,9 +6,9 @@ export const VersionDto = z.object({
   itemId: createIdField("itemId"),
   // Data is nullable because it will be removed once the version is deleted.
   protectedData: ProtectedDataField.nullable(),
-  createdOn: z.string()
-    .min(1, "createdOn must be at least 1 character.")
-    .max(20, "createdOn can't be over 20 characters."),
+  deviceName: z.string()
+    .min(1, "deviceName must be at least 1 character.")
+    .max(20, "deviceName can't be over 20 characters."),
   createdAt: createDateField('createdAt'),
   deletedAt: createDateField('deletedAt').nullable(),
 }).strict()

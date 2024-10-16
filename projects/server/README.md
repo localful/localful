@@ -14,7 +14,7 @@ server for syncing content between devices, backing up content to the server and
 
 1.1. This script will create a `localful` user & database, alternatively create your own database and set the env vars accordingly.
 ```shell
-psql postgres -f < ./scripts/setup.sql
+psql postgres < ./scripts/setup.sql
 ```
 
 1.2. Run database migrations to set up the required tables in your database
@@ -23,13 +23,8 @@ psql -d localful < ./migrations/000-v1-schema.sql
 ```
 
 1.3. You may have to ensure that you user has permissions to access the new tables
-```sql
--- Switch to new database
-\c localful
-
--- Grant privileges to lfb user after everything is created
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO localful;
-GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO localful;
+```shell
+psql postgres < ./scripts/permissions.sql
 ```
 
 ### 2. Install dependencies

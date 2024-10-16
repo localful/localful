@@ -53,6 +53,14 @@ export const EnvironmentSchema = z.object({
       isEu: z.boolean().optional(),
     })
   }),
+  items: z.object({
+    defaultPageLimit: z.number().int(),
+    maxPageLimit: z.number().int(),
+  }),
+  versions: z.object({
+    defaultPageLimit: z.number().int(),
+    maxPageLimit: z.number().int(),
+  }),
 });
 
 export type EnvironmentSchema = z.infer<typeof EnvironmentSchema>;

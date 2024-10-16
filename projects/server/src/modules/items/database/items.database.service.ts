@@ -4,7 +4,7 @@ import {
 	ItemDto,
 	ItemsQueryByFiltersParams,
 	ResourceListingResult,
-	VersionDto
+	VersionDto, VersionsQueryByFiltersParams
 } from "@localful/common";
 import Postgres from "postgres";
 import {PG_FOREIGN_KEY_VIOLATION, PG_UNIQUE_VIOLATION} from "@services/database/database-error-codes.js";
@@ -15,11 +15,14 @@ import {
 	ItemDtoWithOwner,
 	VersionDtoWithOwner,
 } from "@modules/items/database/database-item.js";
+import {EnvironmentService} from "@services/environment/environment.service.js";
+import {UserRequestError} from "@services/errors/base/user-request.error.js";
 
 
 export class ItemsDatabaseService {
 	constructor(
-		private readonly databaseService: DatabaseService
+		private readonly databaseService: DatabaseService,
+		private readonly environmentService: EnvironmentService
 	) {}
 
 	private static getDatabaseError(e: any) {
@@ -163,13 +166,15 @@ export class ItemsDatabaseService {
 		}
 	}
 
-	async getItems(filters: ItemsQueryByFiltersParams): Promise<ResourceListingResult<ItemDto>> {
+	async getItemsByFilters(filters: ItemsQueryByFiltersParams): Promise<ResourceListingResult<ItemDto>> {
 		const sql = await this.databaseService.getSQL();
 
-		const limit = filters.limit || 2
 		const offset = filters.offset || 0
+		const limit = filters.limit
+			? Math.min(filters.limit, this.environmentService.vars.items.maxPageLimit)
+			: this.environmentService.vars.items.defaultPageLimit
 
-		let results: ItemDtoWithOwner[] = [];
+		let results: ItemDto[] = [];
 		let totalCount: number = 0
 		try {
 			const where = sql`
@@ -181,7 +186,7 @@ export class ItemsDatabaseService {
 			`;
 			const paging = sql`order by created_at offset ${offset} limit ${limit}`
 
-			results = await sql<ItemDtoWithOwner[]>`select * from items ${where} ${paging}`;
+			results = await sql<ItemDto[]>`select * from items ${where} ${paging}`;
 
 			const countResult = await sql<{count: number}[]>`select count(*) from items ${where}`
 			if (countResult[0]?.count) {
@@ -333,5 +338,54 @@ export class ItemsDatabaseService {
 		}
 
 		return versions
+	}
+
+	async getVersionsByFilters(filters: VersionsQueryByFiltersParams): Promise<ResourceListingResult<VersionDto>> {
+		const sql = await this.databaseService.getSQL();
+
+		const offset = filters.offset || 0
+		const limit = filters.limit
+			? Math.min(filters.limit, this.environmentService.vars.versions.maxPageLimit)
+			: this.environmentService.vars.versions.defaultPageLimit
+
+		let results: VersionDto[] = [];
+		let totalCount: number = 0
+		try {
+			const where = sql`
+				where item_id in ${sql(filters.itemId)}
+				${filters.deviceName
+					? sql`and device_name in ${sql(filters.deviceName)}`
+					: sql``
+				}
+				${filters.notDeviceName
+					? sql`and device_name not in ${sql(filters.notDeviceName)}`
+					: sql``
+				}
+			`;
+			const paging = sql`order by created_at offset ${offset} limit ${limit}`
+
+			results = await sql<VersionDto[]>`select * from item_versions ${where} ${paging}`;
+
+			const countResult = await sql<{count: number}[]>`select count(*) from item_versions ${where}`
+			if (countResult[0]?.count) {
+				totalCount = parseInt(String(countResult[0].count))
+			}
+			else {
+				throw new SystemError({message: "Failed to fetch query count"})
+			}
+		}
+		catch (e: any) {
+			throw ItemsDatabaseService.getDatabaseError(e);
+		}
+
+		return {
+			meta: {
+				results: results.length,
+				total: totalCount,
+				limit,
+				offset,
+			},
+			results
+		}
 	}
 }

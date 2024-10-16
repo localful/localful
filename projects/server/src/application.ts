@@ -101,7 +101,7 @@ export class Application {
         this.container.bindClass(SnapshotHttpAdapter, { value: SnapshotHttpAdapter, inject: [SnapshotService, AccessControlService] }, {scope: "SINGLETON"});
 
         // Items module
-        this.container.bindClass(ItemsDatabaseService, {value: ItemsDatabaseService, inject: [DatabaseService]}, {scope: "SINGLETON"})
+        this.container.bindClass(ItemsDatabaseService, {value: ItemsDatabaseService, inject: [DatabaseService, EnvironmentService]}, {scope: "SINGLETON"})
         this.container.bindClass(ItemsService, {value: ItemsService, inject: [AccessControlService, EventsService, ItemsDatabaseService, VaultsService]}, {scope: "SINGLETON"})
         this.container.bindClass(ItemsHttpController, {value: ItemsHttpController, inject: [ItemsService, AccessControlService]}, {scope: "SINGLETON"})
 

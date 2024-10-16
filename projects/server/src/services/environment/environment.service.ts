@@ -16,7 +16,7 @@ export class EnvironmentService {
       applicationName: process.env.APPLICATION_NAME,
       port: parseInt(process.env.PORT as string),
       environment: process.env.ENVIRONMENT ?? "production",
-      allowedOrigins: process.env.APP_ALLOWED_ORIGINS ? process.env.APP_ALLOWED_ORIGINS.split(",") : []
+      allowedOrigins: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(",") : []
     },
     database: {
       url: process.env.DATABASE_URL,
@@ -58,5 +58,13 @@ export class EnvironmentService {
         isEu: process.env.EMAIL_MAILGUN_IS_EU === "true"
       }
     },
+    items: {
+      defaultPageLimit: parseInt(process.env.ITEMS_LISTING_DEFAULT_PAGE_LIMIT as string) ?? 100,
+      maxPageLimit: parseInt(process.env.ITEMS_LISTING_MAX_PAGE_LIMIT as string) ?? 100,
+    },
+    versions: {
+      defaultPageLimit: parseInt(process.env.ITEMS_LISTING_DEFAULT_PAGE_LIMIT as string) ?? 50,
+      maxPageLimit: parseInt(process.env.VERSIONS_LISTING_MAX_PAGE_LIMIT as string) ?? 50,
+    }
   });
 }

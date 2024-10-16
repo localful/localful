@@ -1,23 +1,7 @@
 import {UserContext} from "@common/request-context.js";
 import {VaultsService} from "@modules/vaults/vaults.service.js";
 import {ItemsService} from "@modules/items/items.service.js";
-
-// todo: move snapshot types into @localful/common package
-
-export interface VersionSnapshot {
-	id: string
-	deletedAt?: string
-}
-
-export interface ItemSnapshot {
-	id: string
-	type: string
-	deletedAt?: string
-	latestVersion?: string
-	versions?: VersionSnapshot[]
-}
-
-export type Snapshot = ItemSnapshot[]
+import {ItemSnapshot, VaultSnapshot, VersionSnapshot} from "@localful/common";
 
 
 export class SnapshotService {
@@ -33,7 +17,14 @@ export class SnapshotService {
 
 		const items = await this.itemsService._getAllItems(vaultId)
 
-		const snapshot: Snapshot = []
+		const snapshot: VaultSnapshot = {
+			meta: {
+				items: 0,
+				itemsDeleted: 0,
+			},
+			results: []
+		}
+
 		for (const item of items) {
 			const versions = await this.itemsService._getAllVersions(item.id)
 
@@ -44,7 +35,13 @@ export class SnapshotService {
 
 			if (item.deletedAt) {
 				itemSnapshot.deletedAt = item.deletedAt
+				snapshot.meta.itemsDeleted += 1
 			}
+			else {
+				snapshot.meta.items += 1
+			}
+
+
 			if (versions.length) {
 				itemSnapshot.latestVersion = versions[0].id
 				itemSnapshot.versions = versions.map((version) => {
@@ -59,7 +56,7 @@ export class SnapshotService {
 				})
 			}
 
-			snapshot.push(itemSnapshot)
+			snapshot.results.push(itemSnapshot)
 		}
 
 		return snapshot

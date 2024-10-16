@@ -7,6 +7,7 @@ import {VaultsService} from "@modules/vaults/vaults.service.js";
 import {ItemsDatabaseService} from "@modules/items/database/items.database.service.js";
 import {ItemDtoWithOwner, VersionDtoWithOwner} from "@modules/items/database/database-item.js";
 import {ResourceListingResult} from "@localful/common";
+import {g} from "vitest/dist/chunks/suite.CcK46U-P.js";
 
 
 export class ItemsService {
@@ -108,7 +109,7 @@ export class ItemsService {
             targetUserId: vault.ownerId,
         })
 
-        return this.itemsDatabaseService.getItems(filters)
+        return this.itemsDatabaseService.getItemsByFilters(filters)
     }
 
     async _getAllItems(vaultId: string): Promise<ItemDto[]> {
@@ -196,15 +197,9 @@ export class ItemsService {
     }
 
     async getVersionsByFilters(userContext: UserContext, filters: VersionsQueryByFiltersParams): Promise<ResourceListingResult<VersionDto>> {
-        return {
-            meta: {
-                results: 0,
-                total: 100,
-                limit: 10,
-                offset: 0,
-            },
-            results: []
-        }
+        // Fetch all items to ensure the user has permissions to access these items, and ensure they all exist.
+        await this.getItemsById(userContext, filters.itemId)
+        return this.itemsDatabaseService.getVersionsByFilters(filters)
     }
 
     async _getAllVersions(itemId: string): Promise<VersionDto[]> {
