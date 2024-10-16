@@ -59,12 +59,20 @@ export class EnvironmentService {
       }
     },
     items: {
-      defaultPageLimit: parseInt(process.env.ITEMS_LISTING_DEFAULT_PAGE_LIMIT as string) ?? 100,
-      maxPageLimit: parseInt(process.env.ITEMS_LISTING_MAX_PAGE_LIMIT as string) ?? 100,
+      defaultPageLimit: process.env.ITEMS_LISTING_DEFAULT_PAGE_LIMIT
+        ? parseInt(process.env.ITEMS_LISTING_DEFAULT_PAGE_LIMIT as string)
+        : 100,
+      maxPageLimit: process.env.ITEMS_LISTING_MAX_PAGE_LIMIT
+        ? parseInt(process.env.ITEMS_LISTING_MAX_PAGE_LIMIT as string)
+        : 100,
     },
     versions: {
-      defaultPageLimit: parseInt(process.env.ITEMS_LISTING_DEFAULT_PAGE_LIMIT as string) ?? 50,
-      maxPageLimit: parseInt(process.env.VERSIONS_LISTING_MAX_PAGE_LIMIT as string) ?? 50,
+      defaultPageLimit: process.env.ITEMS_LISTING_DEFAULT_PAGE_LIMIT
+        ? parseInt(process.env.ITEMS_LISTING_DEFAULT_PAGE_LIMIT as string)
+        : 50,
+      maxPageLimit: process.env.VERSIONS_LISTING_MAX_PAGE_LIMIT
+        ? parseInt(process.env.VERSIONS_LISTING_MAX_PAGE_LIMIT as string)
+        : 50,
     }
   });
 }
