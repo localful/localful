@@ -1,7 +1,7 @@
 import {Sql} from "postgres";
 import {exampleUser1, testAdminUser1, testAdminUser2Unverified, testUser1, testUser2Unverified} from "./data/users.js";
 import {testAdminUser1Vault1, testUser1Vault1, testUser1Vault2} from "./data/vaults.js";
-import testItems from "./data/test-items.json"
+import {testItems} from "./data/test-items.js"
 
 export interface ScriptOptions {
   logging: boolean

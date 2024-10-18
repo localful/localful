@@ -1,4 +1,4 @@
-{
+export const testItems = {
   "ad5a85d1-86db-477e-af04-19033ef9c53e": {
     "active": [
       {
@@ -9926,4 +9926,4 @@
       }
     ]
   }
-}
+} as const

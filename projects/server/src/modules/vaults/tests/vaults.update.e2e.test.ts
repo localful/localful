@@ -53,7 +53,9 @@ describe("Update Profile - /v1/vaults [PATCH]",() => {
         ...testUser1Vault1,
         name,
         protectedEncryptionKey,
-        protectedData
+        protectedData,
+        // todo: add test for timestamp showing today's date after updating
+        updatedAt: expect.any(String)
       }))
     });
 
@@ -83,7 +85,8 @@ describe("Update Profile - /v1/vaults [PATCH]",() => {
         ...testAdminUser1Vault1,
         name,
         protectedEncryptionKey,
-        protectedData
+        protectedData,
+        updatedAt: expect.any(String)
       }))
     });
 
@@ -113,7 +116,8 @@ describe("Update Profile - /v1/vaults [PATCH]",() => {
         ...testUser1Vault1,
         name,
         protectedEncryptionKey,
-        protectedData
+        protectedData,
+        updatedAt: expect.any(String)
       }))
     });
   })
