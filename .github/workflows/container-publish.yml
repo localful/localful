@@ -5,7 +5,8 @@ on:
       - '**'
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: localful-server
+  # Name the image 'localful-server' not just 'localful' to be clearer.
+  IMAGE_NAME: ${{ github.repository_owner }}/localful-server
 jobs:
   build-and-push-image:
     runs-on: ubuntu-latest
