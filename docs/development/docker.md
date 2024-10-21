@@ -29,4 +29,3 @@ docker build . --tag localful-server
 ```
 docker run localful-server -p 8080:8080
 ```
-

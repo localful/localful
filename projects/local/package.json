@@ -1,6 +1,6 @@
 {
   "name": "@localful/local",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "The client-side device library of Localful which includes server integrations and other useful utilities.",
   "author": "Ben-Ryder <dev@benryder.me> (https://www.benryder.me)",
   "homepage": "https://github.com/Ben-Ryder/localful",
