@@ -154,15 +154,15 @@ export class Application {
         // Auth module routes
         const authHttpController = this.container.resolve<AuthHttpController>(AuthHttpController);
         app.post("/v1/auth/login", authHttpController.login.bind(authHttpController))
-        app.post("/v1/auth/logout", authHttpController.logout.bind(authHttpController))
         app.post("/v1/auth/refresh", authHttpController.refresh.bind(authHttpController))
+        app.post("/v1/auth/logout", authHttpController.logout.bind(authHttpController))
         app.get("/v1/auth/check", authHttpController.check.bind(authHttpController))
         app.get("/v1/auth/verify-email", authHttpController.requestEmailVerification.bind(authHttpController))
         app.post("/v1/auth/verify-email", authHttpController.verifyEmail.bind(authHttpController))
         app.get("/v1/auth/change-email", authHttpController.requestEmailChange.bind(authHttpController))
         app.post("/v1/auth/change-email", authHttpController.changeEmail.bind(authHttpController))
-        app.get("/v1/auth/change-password", authHttpController.requestPasswordChange.bind(authHttpController))
-        app.post("/v1/auth/change-password", authHttpController.changePassword.bind(authHttpController))
+        app.get("/v1/auth/reset-password", authHttpController.requestPasswordReset.bind(authHttpController))
+        app.post("/v1/auth/reset-password", authHttpController.resetPassword.bind(authHttpController))
 
         // Users module routes
         const usersHttpController = this.container.resolve<UsersHttpController>(UsersHttpController);

@@ -32,6 +32,7 @@ Any errors will be returned with the appropriate status code and the following J
 - `/v1/auth/login [POST]`
 - `/v1/auth/refresh [POST]`
 - `/v1/auth/logout [POST]`
+- `/v1/auth/check [GET]`
 - `/v1/auth/verify-email [GET, POST]`
 - `/v1/auth/change-email [GET, POST]`
 - `/v1/auth/reset-password [GET, POST]`

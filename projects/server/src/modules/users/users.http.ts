@@ -22,7 +22,7 @@ export class UsersHttpController {
       const newUser = await this.usersService.create(createUserDto);
       const createdTokenPair = await this.tokenService.createNewTokenPair(newUser);
 
-      res.status(HttpStatusCodes.CREATED).json({
+      return res.status(HttpStatusCodes.CREATED).json({
         user: newUser,
         tokens: createdTokenPair.tokens
       });
@@ -38,7 +38,7 @@ export class UsersHttpController {
       const params = await validateSchema(req.params, UsersURLParams);
 
       const user = await this.usersService.get(requestUser, params.userId);
-      res.status(HttpStatusCodes.OK).json(user)
+      return res.status(HttpStatusCodes.OK).json(user)
     }
     catch (error) {
       next(error)
@@ -52,7 +52,7 @@ export class UsersHttpController {
       const updateUserDto = await validateSchema(req.body, UpdateUserDto);
 
       const result = await this.usersService.update(requestUser, params.userId, updateUserDto);
-      res.status(HttpStatusCodes.OK).json(result)
+      return res.status(HttpStatusCodes.OK).json(result)
     }
     catch (error) {
       next(error)
@@ -65,7 +65,7 @@ export class UsersHttpController {
       const params = await validateSchema(req.params, UsersURLParams);
 
       await this.usersService.delete(requestUser, params.userId);
-      res.sendStatus(HttpStatusCodes.OK)
+      return res.status(HttpStatusCodes.OK).json({statusCode: HttpStatusCodes.OK});
     }
     catch (error) {
       next(error)

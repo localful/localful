@@ -72,7 +72,7 @@ export class ItemsHttpController {
       const requestUser = await this.accessControlService.validateAuthentication(req);
 
       await this.itemsService.deleteItem(requestUser, params.itemId);
-      return res.sendStatus(HttpStatusCodes.OK)
+      return res.status(HttpStatusCodes.OK).json({statusCode: HttpStatusCodes.OK});
     }
     catch (error) {
       next(error)
@@ -111,7 +111,7 @@ export class ItemsHttpController {
       const requestUser = await this.accessControlService.validateAuthentication(req);
 
       await this.itemsService.deleteVersion(requestUser, params.versionId);
-      return res.sendStatus(HttpStatusCodes.OK)
+      return res.status(HttpStatusCodes.OK).json({statusCode: HttpStatusCodes.OK});
     }
     catch (error) {
       next(error)

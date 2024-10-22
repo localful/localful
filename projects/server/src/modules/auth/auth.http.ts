@@ -28,8 +28,8 @@ export class AuthHttpController {
   async logout(req: Request, res: Response, next: NextFunction) {
     try {
       const data = await validateSchema(req.body, LogoutRequest);
-      const response = await this.authService.logout(data.refreshToken);
-      return res.status(HttpStatusCodes.OK).json(response);
+      await this.authService.logout(data.refreshToken);
+      return res.status(HttpStatusCodes.OK).json({statusCode: HttpStatusCodes.OK});
     }
     catch (error) {
       next(error)
@@ -50,10 +50,7 @@ export class AuthHttpController {
   async check(req: Request, res: Response, next: NextFunction) {
     try {
       await this.accessControlService.validateAuthentication(req);
-      return res.status(HttpStatusCodes.OK).send({
-        statusCode: HttpStatusCodes.OK,
-        message: "Current user is authenticated"
-      });
+      return res.status(HttpStatusCodes.OK).send({statusCode: HttpStatusCodes.OK});
     }
     catch(error) {
       next(error)
@@ -72,7 +69,7 @@ export class AuthHttpController {
     try {
       const requestUser = await this.accessControlService.validateAuthentication(req);
       await this.authService.requestEmailVerification(requestUser.id)
-      return res.sendStatus(HttpStatusCodes.OK)
+      return res.status(HttpStatusCodes.OK).json({statusCode: HttpStatusCodes.OK});
     }
     catch (error) {
       next(error)
@@ -102,7 +99,7 @@ export class AuthHttpController {
     try {
       await this.accessControlService.validateAuthentication(req);
 
-      // todo: implement /v1/auth/verify [GET]
+      // todo: implement /v1/auth/change-email [GET]
       return res.status(HttpStatusCodes.NOT_IMPLEMENTED).send({
         statusCode: HttpStatusCodes.NOT_IMPLEMENTED,
         message: "Email changing has not been implemented yet"
@@ -117,7 +114,7 @@ export class AuthHttpController {
     try {
       await this.accessControlService.validateAuthentication(req);
 
-      // todo: implement /v1/auth/verify [GET]
+      // todo: implement /v1/auth/change-email [POST]
       return res.status(HttpStatusCodes.NOT_IMPLEMENTED).send({
         statusCode: HttpStatusCodes.NOT_IMPLEMENTED,
         message: "Email changing has not been implemented yet"
@@ -128,11 +125,11 @@ export class AuthHttpController {
     }
   }
 
-  async requestPasswordChange(req: Request, res: Response, next: NextFunction) {
+  async requestPasswordReset(req: Request, res: Response, next: NextFunction) {
     try {
       await this.accessControlService.validateAuthentication(req);
 
-      // todo: implement /v1/auth/verify [GET]
+      // todo: implement /v1/auth/password-reset [GET]
       return res.status(HttpStatusCodes.NOT_IMPLEMENTED).send({
         statusCode: HttpStatusCodes.NOT_IMPLEMENTED,
         message: "Password reset has not been implemented yet"
@@ -143,11 +140,11 @@ export class AuthHttpController {
     }
   }
 
-  async changePassword(req: Request, res: Response, next: NextFunction) {
+  async resetPassword(req: Request, res: Response, next: NextFunction) {
     try {
       await this.accessControlService.validateAuthentication(req);
 
-      // todo: implement /v1/auth/verify [GET]
+      // todo: implement /v1/auth/password-reset [POST]
       return res.status(HttpStatusCodes.NOT_IMPLEMENTED).send({
         statusCode: HttpStatusCodes.NOT_IMPLEMENTED,
         message: "Password reset has not been implemented yet"

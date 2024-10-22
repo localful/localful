@@ -22,7 +22,7 @@ export class VaultsHttpController {
       const createVaultDto = await validateSchema(req.body, CreateVaultDto);
 
       const result = await this.vaultsService.create(requestUser, createVaultDto);
-      res.status(HttpStatusCodes.CREATED).json(result);
+      return res.status(HttpStatusCodes.CREATED).json(result);
     }
     catch (error) {
       next(error);
@@ -35,7 +35,7 @@ export class VaultsHttpController {
       const params = await validateSchema(req.params, VaultsURLParams);
 
       const result = await this.vaultsService.get(requestUser, params.vaultId);
-      res.status(HttpStatusCodes.OK).json(result);
+      return res.status(HttpStatusCodes.OK).json(result);
     }
     catch (error) {
       next(error);
@@ -49,7 +49,7 @@ export class VaultsHttpController {
       const updateVaultDto = await validateSchema(req.body, UpdateVaultDto);
 
       const result = await this.vaultsService.update(requestUser, params.vaultId, updateVaultDto);
-      res.status(HttpStatusCodes.OK).json(result);
+      return res.status(HttpStatusCodes.OK).json(result);
     }
     catch (error) {
       next(error);
@@ -61,8 +61,8 @@ export class VaultsHttpController {
       const requestUser = await this.accessControlService.validateAuthentication(req);
       const params = await validateSchema(req.params, VaultsURLParams);
 
-      const result = await this.vaultsService.delete(requestUser, params.vaultId);
-      res.status(HttpStatusCodes.OK).json(result);
+      await this.vaultsService.delete(requestUser, params.vaultId);
+      return res.status(HttpStatusCodes.OK).json({statusCode: HttpStatusCodes.OK});
     }
     catch (error) {
       next(error);

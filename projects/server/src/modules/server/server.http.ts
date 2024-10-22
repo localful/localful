@@ -15,7 +15,7 @@ export class ServerManagementHttpController {
   async requestHealthCheck(req: Request, res: Response, next: NextFunction) {
     try {
       const result = await this.serverManagementService.runHealthCheck()
-      res.status(HttpStatusCodes.OK).json(result);
+      return res.status(HttpStatusCodes.OK).json(result);
     }
     catch (e) {
       next(e)
