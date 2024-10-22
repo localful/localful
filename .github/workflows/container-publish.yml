@@ -2,7 +2,7 @@ name: Create and publish a Docker image to GitHub Container Registry
 on:
   push:
     tags:
-      - '**'
+      - 'server/**'
 env:
   REGISTRY: ghcr.io
   # Name the image 'localful-server' not just 'localful' to be clearer.
